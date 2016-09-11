@@ -4,6 +4,30 @@
 	box-sizing: border-box;
 	font-family: Helvetica, Arial;
 }
+#fileUploadButton{
+	color: #da9f93;
+	text-shadow: 1px 1px 1px;
+    font-size: 50em;
+	overflow: hidden;
+    position: relative;
+    cursor: pointer;
+}
+
+.fileInput {
+    cursor: pointer;
+    height: 100%;
+	width: 100%;
+    position:absolute;
+    top: 0;
+    right: 0;
+    /*This makes the button huge so that it can be clicked on*/
+}
+.hidden {
+    /*Opacity settings for all browsers*/
+    opacity: 0;
+    -moz-opacity: 0;
+    filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0)
+}
 
 body {
 	font-size: 14px;
@@ -11,6 +35,7 @@ body {
 	padding: 2em;
 	max-width: 100em;
 	margin: 0 auto;
+	background: #890620
 }
 
 @media (min-width: 600px) {
@@ -45,15 +70,6 @@ input[type=text] {
 }
 input[type=submit] {
 	padding: 0.5em;
-	border: 1px solid #ccc;
-	background-color: #ddd;
-	cursor: pointer;
-	font-size:1em;
-	display:block;
-	width: 100%
-}
-#drop_zone {
-    padding: 0.5em;
 	border: 1px solid #ccc;
 	background-color: #ddd;
 	cursor: pointer;
