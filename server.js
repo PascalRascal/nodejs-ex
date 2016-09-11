@@ -91,6 +91,10 @@ app.get('/pagecount', function (req, res) {
   }
 });
 
+app.get('/musicfun', function (req, res){
+    res.render('musicAnalysis/index.html');
+})
+
 // error handling
 app.use(function(err, req, res, next){
   console.error(err.stack);
