@@ -25,14 +25,13 @@ var totalSongSize = 0;
 var renderedBuffer;
 var originalSongBuffer;
 var fileUpload = document.getElementById("drop_zone");
+var songs = [];
 omniButton.mode = "fileUpload"
 
 //Controls for the Omni-Button
 omniButton.addEventListener("click", function (ev) {
     if (omniButton.mode === "generateWorkout") {
         uploadFunction();
-        omniButtonIcon.classList = "fa fa-cog fa-spin"
-        omniButtonPrompt.innerHTML = "Analyzing Your Awesome Songs"
     } else if (omniButton.mode === "startWorkout") {
         playBack();
     }
@@ -111,6 +110,9 @@ result.style.display = 'none';
 
 //Trims the data and removes any irrelevant meta-data, also gets the sampling rate about the song
 function handleArrayBuffer(musicArrayBuffer) {
+    omniButtonIcon.classList = "fa fa-cog fa-spin"
+    omniButtonPrompt.innerHTML = "Analyzing Your Awesome Songs"
+    
     var musicDataView = new DataView(musicArrayBuffer);
 
     var frameCount = 0;
@@ -302,7 +304,7 @@ function drawData(peaks, sections, buffer) {
 
     //Draw the peaks
     console.log(peaks);
-
+    /*
     peaks.forEach(function (peak) {
         rect = document.createElementNS(svgNS, 'rect');
         rect.setAttributeNS(null, 'x', (100 * peak.position / buffer[0].length) + '%');
@@ -311,6 +313,7 @@ function drawData(peaks, sections, buffer) {
         rect.setAttributeNS(null, 'height', '100%');
         svg.appendChild(rect);
     });
+    */
 
 
 
@@ -338,6 +341,7 @@ function drawData(peaks, sections, buffer) {
 
     result.style.display = 'block';
     omniButtonIcon.classList = "fa fa-play";
+    omniButtonPrompt.innerHTML = "Ready to go HAM"
     omniButton.mode = "startWorkout";
 };
 //Displays information about a particular section

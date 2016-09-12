@@ -31,6 +31,12 @@
 	border-width: 1px;
 }
 
+#altButton{
+	background-color: #2c0703;
+	border: none;
+	padding: 5px;
+}
+
 .fileInput {
     cursor: pointer;
     height: 100%;
