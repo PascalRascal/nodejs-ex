@@ -2,7 +2,7 @@
 	box-sizing: border-box;
 	font-family: Helvetica, Arial;
 }
-#fileUploadButton{
+#omniButton{
 	color: #da9f93;
 	text-shadow: 1px 1px 1px;
     font-size: 25vmax;
@@ -13,7 +13,7 @@
 	cursor: pointer;
 }
 
-#userTip{
+#omniButtonPrompt{
 	font-size: 1em;
 }
 .userPrompts{

@@ -17,27 +17,50 @@ var queryInput = document.querySelector('#query'),
     audioTag = document.querySelector('#audio'),
     playButton = document.querySelector('#play'),
     audioPreview = document.getElementById('musicPreview'),
-    fileList = document.getElementById("fileList");
+    fileList = document.getElementById("fileList"),
+    omniButton = document.getElementById("omniButton"),
+    omniButtonIcon = document.getElementById("omniButtonIcon"),
+    omniButtonPrompt = document.getElementById("omniButtonPrompt");
 var totalSongSize = 0;
 var renderedBuffer;
 var originalSongBuffer;
 var fileUpload = document.getElementById("drop_zone");
+omniButton.mode = "fileUpload"
 
+//Controls for the Omni-Button
+omniButton.addEventListener("click", function (ev) {
+    if (omniButton.mode === "generateWorkout") {
+        uploadFunction();
+        omniButtonIcon.classList = "fa fa-cog fa-spin"
+        omniButtonPrompt.innerHTML = "Analyzing Your Awesome Songs"
+    } else if (omniButton.mode === "startWorkout") {
+        playBack();
+    }
+})
 
-function updateFileList(){
+//Show the user what files they chose
+function updateFileList() {
     console.log(fileUpload.files);
-    for(var i = 0; i < fileUpload.files.length; i++){
+    for (var i = 0; i < fileUpload.files.length; i++) {
         renderFile(fileUpload.files[i]);
     }
-    function renderFile(file){
-        var fileDiv = document.createElement("div");
-        fileDiv.classList = "fileEntry text-center";
-        fileDiv.innerHTML = `
-        <h3> ` + file.name.slice(0, file.name.length - 4) + `<h3>
-        `
-        fileList.appendChild(fileDiv);
-    }
 
+
+    omniButtonIcon.classList = "fa fa-cog";
+    omniButton.mode = "generateWorkout";
+    omniButtonPrompt.innerHTML = "Analyze Your Awesome Songs"
+    fileUpload.classList += " hidden";
+
+}
+
+//Shows a file to the user
+function renderFile(file) {
+    var fileDiv = document.createElement("div");
+    fileDiv.classList = "fileEntry text-center";
+    fileDiv.innerHTML = `
+        <h3> ` + file.name.slice(0, file.name.length - 4) + `<h3>
+    `
+    fileList.appendChild(fileDiv);
 }
 //Keep track of URLs created so we can delete them later if necessary
 var sectionURLs = [];
@@ -66,6 +89,15 @@ audioTag.addEventListener('play', updatePlayLabel);
 audioTag.addEventListener('playing', updatePlayLabel);
 audioTag.addEventListener('pause', updatePlayLabel);
 audioTag.addEventListener('ended', updatePlayLabel);
+function playBack(){
+    if (audioTag.paused) {
+        audioTag.play();
+        omniButtonIcon.classList = "fa fa-pause";
+    } else {
+        audioTag.pause();
+        omniButtonIcon.classList = "fa fa-play";
+    }
+}
 
 playButton.addEventListener('click', function () {
     if (audioTag.paused) {
@@ -270,8 +302,8 @@ function drawData(peaks, sections, buffer) {
 
     //Draw the peaks
     console.log(peaks);
-    
-    peaks.forEach(function(peak) {
+
+    peaks.forEach(function (peak) {
         rect = document.createElementNS(svgNS, 'rect');
         rect.setAttributeNS(null, 'x', (100 * peak.position / buffer[0].length) + '%');
         rect.setAttributeNS(null, 'y', 0);
@@ -279,7 +311,7 @@ function drawData(peaks, sections, buffer) {
         rect.setAttributeNS(null, 'height', '100%');
         svg.appendChild(rect);
     });
-  
+
 
 
     rect = document.createElementNS(svgNS, 'rect');
@@ -305,6 +337,8 @@ function drawData(peaks, sections, buffer) {
 
 
     result.style.display = 'block';
+    omniButtonIcon.classList = "fa fa-play";
+    omniButton.mode = "startWorkout";
 };
 //Displays information about a particular section
 function drawSection(section, index) {
@@ -345,11 +379,11 @@ var uploadFunction = function () {
 }
 
 //Loads and analyzes the example song
-function getExampleAudio(){
+function getExampleAudio() {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', window.location.href +  '/exampleSongs/FuriousFreak.mp3', true);
+    xhr.open('GET', window.location.href + '/exampleSongs/FuriousFreak.mp3', true);
     xhr.responseType = 'arraybuffer';
-    xhr.onload = function(e){
+    xhr.onload = function (e) {
         handleArrayBuffer(this.response);
     }
     xhr.send();
