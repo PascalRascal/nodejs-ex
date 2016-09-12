@@ -112,7 +112,7 @@ result.style.display = 'none';
 function handleArrayBuffer(musicArrayBuffer) {
     omniButtonIcon.classList = "fa fa-cog fa-spin"
     omniButtonPrompt.innerHTML = "Analyzing Your Awesome Songs"
-    
+
     var musicDataView = new DataView(musicArrayBuffer);
 
     var frameCount = 0;
@@ -391,6 +391,7 @@ function getExampleAudio() {
         handleArrayBuffer(this.response);
     }
     xhr.send();
+    fileUpload.classList = "hidden";
 
 }
 
