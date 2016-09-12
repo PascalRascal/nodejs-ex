@@ -3,22 +3,41 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Finding out the BPM of a song using Javascript</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="bootstrap-3.3.7-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="stylesheets/main.css">
-    <link rel="stylesheet" type="text/css" href="stylesheets/font-awesome.min.css"
     <meta name="description" content="Demo of an algorithm to calculate tempo of a track using the Audio API.">
 </head>
 <body>
-    <div>
-        Peaks per Second:
-        <input id="userPPS" type="number" max="10" value="4"/>
+    <h1 class="text-center"> HIITunes </h1>
+    <div id="fileUploadButton" class="text-center">
+        <span>
+            <i class="fa fa-plus-square-o" aria-hidden="true">  </i>
+            <input class="fileInput" type="file" id="drop_zone" accept=".mp3" onchange="updateFileList()" multiple/>
+        </span>
     </div>
+    <div id="userTip" class="text-center">
+        <p>
+            Drop Some Serious Fire
+        </p>
+    </div>
+
+
+    <div class="userPrompts text-center">
         <div>
-         Breadth of Section (Higher number means less sections):
-        <input id="userSectionMargin" type="number" max="5" value="1.25">
+            Peaks per Second:
+            <input id="userPPS" type="number" max="10" value="4"/>
+        </div>
+            <div>
+            Breadth of Section (Higher number means less sections):
+            <input id="userSectionMargin" type="number" max="5" value="1.25">
+        </div>
+        <button id="SongAnalyzer" onclick="uploadFunction()"> Analyze Your Song! </button>
+        <button onclick="getExampleAudio()"> Analyze An Example Song! </button>
     </div>
-    <button id="SongAnalyzer" onclick="uploadFunction()"> Analyze Your Song! </button>
-    <button onclick="getExampleAudio()"> Analyze An Example Song! </button>
+    <div id="fileList" class="fileList">
+    </div>
 
 
 
@@ -36,13 +55,7 @@
 
 
     </div>
-    <div id="fileUploadButton">
-        <i class="fa fa-plus-square-o" aria-hidden="true">
-            
-        </i>
-        <input class="fileInput hidden" type="file" id="drop_zone"/>
-        
-    </div>
+    
 
 
     <div id="sectionAnalysis">

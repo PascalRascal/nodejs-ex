@@ -16,12 +16,33 @@ var queryInput = document.querySelector('#query'),
     text = document.querySelector('#text'),
     audioTag = document.querySelector('#audio'),
     playButton = document.querySelector('#play'),
-    audioPreview = document.getElementById('musicPreview');
+    audioPreview = document.getElementById('musicPreview'),
+    fileList = document.getElementById("fileList");
 var totalSongSize = 0;
 var renderedBuffer;
 var originalSongBuffer;
+var fileUpload = document.getElementById("drop_zone");
+
+
+function updateFileList(){
+    console.log(fileUpload.files);
+    for(var i = 0; i < fileUpload.files.length; i++){
+        renderFile(fileUpload.files[i]);
+    }
+    function renderFile(file){
+        var fileDiv = document.createElement("div");
+        fileDiv.classList = "fileEntry text-center";
+        fileDiv.innerHTML = `
+        <h3> ` + file.name.slice(0, file.name.length - 4) + `<h3>
+        `
+        fileList.appendChild(fileDiv);
+    }
+
+}
 //Keep track of URLs created so we can delete them later if necessary
 var sectionURLs = [];
+
+//Displays the Files Uploaded to the user
 
 function updateProgressState() {
     if (audioTag.paused) {
@@ -307,9 +328,7 @@ function drawSection(section, index) {
     document.getElementById("sectionAnalysis").appendChild(sectionDiv);
 }
 
-
 //Loads and analyzes user file
-var fileUpload = document.getElementById("drop_zone");
 var uploadFunction = function () {
 
     var musicFile = fileUpload.files[0];
