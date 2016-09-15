@@ -95,6 +95,14 @@ app.get('/pagecount', function (req, res) {
 app.get('/musicfun', function (req, res){
     res.render('musicAnalysis/index.html');
 })
+//TODO: Make accounts rofl
+app.post('/register', function(req, res){
+
+})
+//TODO: Make accounts rofl
+app.post('/login', function(req, res){
+
+})
 
 // error handling
 app.use(function(err, req, res, next){

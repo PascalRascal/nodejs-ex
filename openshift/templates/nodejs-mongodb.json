@@ -2,7 +2,7 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "hiitunes",
+    "name": "nodejs-mongodb-example",
     "annotations": {
       "description": "An example Node.js application with a MongoDB database",
       "tags": "quickstart,nodejs,mongodb",
@@ -10,7 +10,7 @@
     }
   },
   "labels": {
-    "template": "hellofriend"
+    "template": "nodejs-mongodb-example"
   },
   "objects": [
     {
@@ -143,7 +143,7 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "hiitunes"
+                "nodejs-mongodb-example"
               ],
               "from": {
                 "kind": "ImageStreamTag",
@@ -169,7 +169,7 @@
           "spec": {
             "containers": [
               {
-                "name": "hiitunes",
+                "name": "nodejs-mongodb-example",
                 "image": " ",
                 "ports": [
                   {
@@ -364,7 +364,7 @@
       "displayName": "Name",
       "description": "The name assigned to all of the frontend objects defined in this template.",
       "required": true,
-      "value": "hiitunes"
+      "value": "nodejs-mongodb-example"
     },
     {
       "name": "NAMESPACE",
