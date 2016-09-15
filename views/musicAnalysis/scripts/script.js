@@ -26,6 +26,7 @@ var renderedBuffer;
 var originalSongBuffer;
 var fileUpload = document.getElementById("drop_zone");
 var songs = [];
+var songsAnalyzed = 0;
 omniButton.mode = "fileUpload"
 
 //Controls for the Omni-Button
@@ -39,7 +40,6 @@ omniButton.addEventListener("click", function (ev) {
 
 //Show the user what files they chose
 function updateFileList() {
-    console.log(fileUpload.files);
     for (var i = 0; i < fileUpload.files.length; i++) {
         renderFile(fileUpload.files[i]);
     }
@@ -88,7 +88,7 @@ audioTag.addEventListener('play', updatePlayLabel);
 audioTag.addEventListener('playing', updatePlayLabel);
 audioTag.addEventListener('pause', updatePlayLabel);
 audioTag.addEventListener('ended', updatePlayLabel);
-function playBack(){
+function playBack() {
     if (audioTag.paused) {
         audioTag.play();
         omniButtonIcon.classList = "fa fa-pause";
@@ -109,9 +109,10 @@ playButton.addEventListener('click', function () {
 result.style.display = 'none';
 
 //Trims the data and removes any irrelevant meta-data, also gets the sampling rate about the song
-function handleArrayBuffer(musicArrayBuffer) {
+function handleArrayBuffer(musicArrayBuffer, currentSong) {
     omniButtonIcon.classList = "fa fa-cog fa-spin"
     omniButtonPrompt.innerHTML = "Analyzing Your Awesome Songs"
+
 
     var musicDataView = new DataView(musicArrayBuffer);
 
@@ -129,6 +130,7 @@ function handleArrayBuffer(musicArrayBuffer) {
     }
     console.log(mp3Parser.readTags(musicDataView)[tagIndex])
     var samplingRate = mp3Parser.readTags(musicDataView)[tagIndex].header.samplingRate
+    currentSong.samplingRate = samplingRate;
 
     var mp3tags = mp3Parser.readTags(musicDataView)[tagIndex];
     while (true) {
@@ -144,16 +146,23 @@ function handleArrayBuffer(musicArrayBuffer) {
             break;
         }
     }
-    originalSongBuffer = musicArrayBuffer
+    //Clear up memory
+    musicDataView = null;
     //Put the data into the audiotag
     var songBlob = new Blob([musicArrayBuffer], { type: "audio/mpeg3" });
-    audioTag.src = window.URL.createObjectURL(songBlob);
 
-    getMusicData(musicArrayBuffer, sampleCount, samplingRate);
+    currentSong.musicArrayBuffer = musicArrayBuffer;
+    audioTag.src = window.URL.createObjectURL(songBlob);
+    getMusicData(musicArrayBuffer, sampleCount, samplingRate, currentSong);
+    songs.push(currentSong);
+
+    //Clear up memory
+    musicArrayBuffer = null;
+
 }
 
 //Loads the trimmed audio-data and filters it appropiately before analyzing it
-var getMusicData = function (musicArrayBuffer, songsize, samplingRate) {
+var getMusicData = function (musicArrayBuffer, songsize, samplingRate, currentSong) {
     var musicDataView = new DataView(musicArrayBuffer);
 
 
@@ -163,7 +172,7 @@ var getMusicData = function (musicArrayBuffer, songsize, samplingRate) {
 
     //TODO: Impliment mp3-parser to get total frames, should be fun! ^_^
     //kill me
-    var samplingRate = 44100;
+    var samplingRate = samplingRate;
 
 
     // Create offline context
@@ -214,19 +223,29 @@ var getMusicData = function (musicArrayBuffer, songsize, samplingRate) {
     offlineContext.oncomplete = function (e) {
         var userPPS = document.getElementById("userPPS").value;
         var userSectionMargin = document.getElementById("userSectionMargin").value;
-        console.log(userPPS);
 
         var analysisOptions = { partsPerSecond: userPPS, sectionMargin: userSectionMargin };
 
         var renderedBuffer = e.renderedBuffer;
-        console.log([renderedBuffer.getChannelData(0), renderedBuffer.getChannelData(1)]);
-        analyzeSong([renderedBuffer.getChannelData(0), renderedBuffer.getChannelData(1)], samplingRate, analysisOptions, drawData);
+        analyzeSong([renderedBuffer.getChannelData(0), renderedBuffer.getChannelData(1)], samplingRate, analysisOptions, currentSong, showWorkOut);
     };
 };
 
+//
+function showWorkOut(currentSong) {
+    if (isProcessingDone()) {
+        console.log("All songs have been processed!");
+        console.log(songs);
+        result.style.display = 'block';
+        omniButtonIcon.classList = "fa fa-play";
+        omniButtonPrompt.innerHTML = "Ready to go HAM"
+        omniButton.mode = "startWorkout";
+    }
+}
+
 
 //Analyzes the song data, calls cb when done
-function analyzeSong(songData, samplingRate, songOptions, cb) {
+function analyzeSong(songData, samplingRate, songOptions, currentSong, cb) {
     var pps;
     var sm;
     if (songOptions.peaksPerSecond) {
@@ -250,12 +269,13 @@ function analyzeSong(songData, samplingRate, songOptions, cb) {
         var data = e.data;
         if (data.returnType == "peaks") {
             workerPeaks = data.peaks;
-            console.log(workerPeaks);
             workerSongData = data.songData
             getWorkerSections(workerSongData, workerPeaks, data.samplingRate, sm);
         } else if (data.returnType == "sections") {
             var sections = data.sections;
-            cb(workerPeaks, sections, workerSongData);
+            currentSong.analyzedData.sections = data.sections;
+            currentSong.analyzedData.peaks = workerPeaks;
+            cb(currentSong);
         }
     }, false);
 
@@ -271,128 +291,68 @@ function analyzeSong(songData, samplingRate, songOptions, cb) {
         worker.postMessage({ 'cmd': 'getSections', 'peaks': peaks, 'samplingRate': samplingRate, 'songData': songData, 'sectionMargin': sm });
     }
 
+
     getWorkerPeaks(songData, samplingRate, pps);
 
 
 }
-//Draws the sections and peaks
-function drawData(peaks, sections, buffer) {
-    var svg = document.querySelector('#svg');
-    svg.innerHTML = '';
-    var svgNS = 'http://www.w3.org/2000/svg';
-    var rect;
-    document.getElementById("sectionAnalysis").innerHTML = '';
 
-
-    sections.forEach(function (section, index) {
-        rect = document.createElementNS(svgNS, 'rect');
-
-        rect.setAttributeNS(null, 'x', (100 * section.start / buffer[0].length) + '%');
-        rect.setAttributeNS(null, 'y', 0);
-        rect.setAttributeNS(null, 'sectionIndex', index);
-        console.log(sections[rect.getAttribute("sectionIndex")]);
-        rect.setAttributeNS(null, 'fill', section.color);
-        if (section[index + 1]) {
-            rect.setAttributeNS(null, 'width', (100 * ((sections[index + 1].start - section.start) / buffer[0].length)) + `%`);
-        } else {
-            rect.setAttributeNS(null, 'width', (100 * ((buffer[0].length - section.start) / buffer[0].length)) + '%');
-        }
-        rect.setAttributeNS(null, 'height', '100%');
-        svg.appendChild(rect);
-        drawSection(section, index);
-    });
-
-    //Draw the peaks
-    console.log(peaks);
-    /*
-    peaks.forEach(function (peak) {
-        rect = document.createElementNS(svgNS, 'rect');
-        rect.setAttributeNS(null, 'x', (100 * peak.position / buffer[0].length) + '%');
-        rect.setAttributeNS(null, 'y', 0);
-        rect.setAttributeNS(null, 'width', 1);
-        rect.setAttributeNS(null, 'height', '100%');
-        svg.appendChild(rect);
-    });
-    */
-
-
-
-    rect = document.createElementNS(svgNS, 'rect');
-    rect.setAttributeNS(null, 'id', 'progress');
-    rect.setAttributeNS(null, 'y', 0);
-    rect.setAttributeNS(null, 'width', 1);
-    rect.setAttributeNS(null, 'height', '100%');
-    svg.appendChild(rect);
-
-    svg.innerHTML = svg.innerHTML; // force repaint in some browsers
-
-    var totalbeats = 0;
-    var totalDuration = 0;
-    sections.forEach(function (section) {
-        totalbeats = totalbeats + section.bpm * section.duration / 60;
-        totalDuration = totalDuration + section.duration;
-    });
-
-    var avgBPM = totalbeats * 60 / totalDuration;
-
-    text.innerHTML = "The average BPM for this song is " + Math.round(avgBPM) + " beats per minute";
-    console.log(totalDuration);
-
-
-    result.style.display = 'block';
-    omniButtonIcon.classList = "fa fa-play";
-    omniButtonPrompt.innerHTML = "Ready to go HAM"
-    omniButton.mode = "startWorkout";
-};
-//Displays information about a particular section
-function drawSection(section, index) {
-    sectionDiv = document.createElement("div");
-    sectionDiv.addEventListener("click", function () {
-        var progressIndicator = document.querySelector('#progress');
-        audioTag.currentTime = section.start / section.samplingRate;
-        progressIndicator.setAttribute('x', (audioTag.currentTime * 100 / audioTag.duration) + '%');
-        console.log(section);
-    })
-    sectionDiv.className = "songSection";
-    sectionDiv.innerHTML = `
-        <h3> Section ` + index + `</h3>
-        <br>
-        <b>BPM: ` + section.bpm + `</b> <br>
-        <b>Peaks: ` + section.peaks.length + `</b> <br>
-        <b>Duration: ` + section.duration + `</b> <br>
-        <b>Start: ` + section.start / section.samplingRate + `</b> <br>
-    `
-    sectionDiv.style.backgroundColor = section.color;
-    document.getElementById("sectionAnalysis").appendChild(sectionDiv);
-}
 
 //Loads and analyzes user file
 var uploadFunction = function () {
-
-    var musicFile = fileUpload.files[0];
-    console.log(musicFile);
-
-    //Read the user file into a format that can we can work with, an array buffer
-    var arrayBufferReader = new FileReader();
-    arrayBufferReader.onload = function () {
-        handleArrayBuffer(arrayBufferReader.result);
+    var fileList = [];
+    for (var i = 0; i < fileUpload.files.length; i++) {
+        fileList.push(fileUpload.files[i]);
     }
 
-    arrayBufferReader.readAsArrayBuffer(musicFile);
+    fileList.forEach(function (file, index) {
+        var musicFile = file;
+        var currentSong = new song(musicFile.name, index);
+
+
+        //Read the user file into a format that can we can work with, an array buffer
+        var arrayBufferReader = new FileReader();
+        arrayBufferReader.onload = function () {
+            handleArrayBuffer(arrayBufferReader.result, currentSong);
+            //Clear up memory
+            arrayBufferReader = null;
+        }
+
+        arrayBufferReader.readAsArrayBuffer(musicFile);
+
+    });
 
 }
 
 //Loads and analyzes the example song
 function getExampleAudio() {
+    loadExampleSong('FuriousFreak.mp3', 0);
+    fileUpload.classList = "hidden";
+}
+//Maybe? Have to load multiple songs
+function loadExampleSong(songName, index) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', window.location.href + '/exampleSongs/FuriousFreak.mp3', true);
+    var currentSong = new Song(songName, index)
+    xhr.open('GET', window.location.href + '/exampleSongs/' + songName, true);
     xhr.responseType = 'arraybuffer';
     xhr.onload = function (e) {
-        handleArrayBuffer(this.response);
+        handleArrayBuffer(this.response, currentSong);
     }
     xhr.send();
-    fileUpload.classList = "hidden";
+}
+var song = function (title, index) {
+    this.title = title;
+    this.songIndex = index;
+    this.analyzedData = {};
+}
 
+function isProcessingDone() {
+    for (var i = 0; i < songs.length; i++) {
+        if (!songs[i].analyzedData.sections) {
+            return false;
+        }
+    }
+    return true;
 }
 
 
