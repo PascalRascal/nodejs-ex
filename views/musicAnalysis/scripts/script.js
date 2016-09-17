@@ -27,6 +27,7 @@ var originalSongBuffer;
 var fileUpload = document.getElementById("drop_zone");
 var songs = [];
 var songsAnalyzed = 0;
+var oldSection;
 omniButton.mode = "fileUpload"
 
 //Controls for the Omni-Button
@@ -65,7 +66,6 @@ function renderFile(file) {
 var sectionURLs = [];
 
 //Displays the Files Uploaded to the user
-
 function updateProgressState() {
     if (audioTag.paused) {
         return;
@@ -75,6 +75,14 @@ function updateProgressState() {
         document.getElementById("durationTracker").innerHTML = Math.floor(audioTag.currentTime) + " / " + audioTag.duration;
         progressIndicator.setAttribute('x', (audioTag.currentTime * 100 / audioTag.duration) + '%');
     }
+    var currentSection = checkSection(audioTag.currentTime, songs[0].analyzedData.sections);
+
+    console.log(currentSection.start);
+    if(currentSection != oldSection){
+        console.log("Section Changed!");
+        oldSection = currentSection;
+    }
+
     requestAnimationFrame(updateProgressState);
 }
 audioTag.addEventListener('play', updateProgressState);
@@ -233,6 +241,10 @@ var getMusicData = function (musicArrayBuffer, songsize, samplingRate, currentSo
 
 //
 function showWorkOut(currentSong) {
+    var totalDeviation = 0;
+    var maximumDeviation = 0;
+    var totalDurationOriginal = 0;
+    var totalDurationNew = 0;
     if (isProcessingDone()) {
         console.log("All songs have been processed!");
         console.log(songs);
@@ -240,7 +252,60 @@ function showWorkOut(currentSong) {
         omniButtonIcon.classList = "fa fa-play";
         omniButtonPrompt.innerHTML = "Ready to go HAM"
         omniButton.mode = "startWorkout";
+        oldSection = songs[0].analyzedData.sections[0];
+
+        for(var i = 0; i < currentSong.analyzedData.sections.length; i++){
+            var currentSection = currentSong.analyzedData.sections[i];
+            totalDurationOriginal = totalDurationOriginal + currentSection.duration;
+            currentSection.intensity = currentSection.peaks.length / currentSection.duration;
+        }
+        //Combines sections of they are too short
+        //Skips the first and last section
+        for(var i = 1; i < currentSong.analyzedData.sections.length - 1; i++){
+            var currentSection = currentSong.analyzedData.sections[i];
+            if(currentSection.duration < 3){
+                //If the intensity is closer to the next section, then merge them AND its not the last section
+                if((Math.abs(currentSection.intensity - currentSong.analyzedData.sections[i + 1].intensity) >  Math.abs(currentSection.intensity - currentSong.analyzedData.sections[i - 1].intensity))){
+                    combineSection(i, i + 1, currentSong.analyzedData.sections);
+                }else{
+                    combineSection(i - 1, i, currentSong.analyzedData.sections);
+                    i--;
+                }
+            }
+        }
+        for(var i = 1; i < currentSong.analyzedData.sections.length - 1; i++){
+            var currentSection = currentSong.analyzedData.sections[i];
+            if(currentSection.duration < 3){
+                //If the intensity is closer to the next section, then merge them AND its not the last section
+                if((Math.abs(currentSection.intensity - currentSong.analyzedData.sections[i + 1].intensity) >  Math.abs(currentSection.intensity - currentSong.analyzedData.sections[i - 1].intensity))){
+                    combineSection(i, i + 1, currentSong.analyzedData.sections);
+                }else{
+                    combineSection(i - 1, i, currentSong.analyzedData.sections);
+                    i--;
+                }
+            }
+        }
+        
+        for(var i = 0; i < currentSong.analyzedData.sections.length; i++){
+            var currentSection = currentSong.analyzedData.sections[i];
+            totalDurationNew = totalDurationNew + currentSection.duration;
+        }
     }
+    var totalIntensity = 0;
+    currentSong.analyzedData.sections.forEach(function(section){
+        totalIntensity = totalIntensity + section.intensity;
+    });
+    var avgIntensity = totalIntensity / currentSong.analyzedData.sections.length;
+    console.log("Average Intensity: " + avgIntensity);
+    var intensityDev = getStandardDev(currentSong.analyzedData.sections, avgIntensity);
+
+    currentSong.analyzedData.sections.forEach(function(section, index){
+        section.intensityDeviation = (section.intensity - avgIntensity) / intensityDev;
+        drawSection(section, index);
+    });
+    console.log(currentSong);
+    console.log(totalDurationOriginal);
+    console.log(totalDurationNew);
 }
 
 
@@ -354,6 +419,79 @@ function isProcessingDone() {
     }
     return true;
 }
+
+//Combines two sections
+//Assume that i < j
+function combineSection(i, j, sections){
+    if(sections[i] && sections[j]){
+        console.log("Starting to slice the sections")
+        //Combine the easy things
+        var newStart = sections[i].start;
+        var newEnd = sections[j].end;
+        var duration = sections[i].duration + sections[j].duration;
+        var length = sections[i].length + sections[j].length;
+
+        //Combine Peaks
+        Array.prototype.push.apply(sections[i].peaks, sections[j].peaks);
+
+        var standardDeviation = ((sections[i].stdDev * sections[i].duration) + (sections[j].stdDev * sections[j].duration)) / duration;
+        var averageVolume = ((sections[i].avgVolume * sections[i].duration) + (sections[j].avgVolume * sections[j].duration)) / duration;
+
+        sections[i].start = newStart
+        sections[i].end = newEnd;
+        sections[i].duration = duration;
+        sections[i].length = length;
+        sections[i].stdDev = standardDeviation;
+        sections[i].avgVolume = averageVolume;
+        sections[i].intensity = sections[i].peaks.length / duration;
+        sections.splice(j, 1);
+    }
+}
+
+
+
+function drawSection(section, index) {
+    sectionDiv = document.createElement("div");
+    sectionDiv.addEventListener("click", function () {
+        var progressIndicator = document.querySelector('#progress');
+        audioTag.currentTime = section.start / section.samplingRate;
+        progressIndicator.setAttribute('x', (audioTag.currentTime * 100 / audioTag.duration) + '%');
+        console.log(section);
+    })
+    sectionDiv.className = "songSection";
+    sectionDiv.innerHTML = `
+        <h3> Section ` + index + `</h3>
+        <br>
+        <b>IntensityDeviation: ` + section.intensityDeviation + `</b> <br>
+        <b>Peaks: ` + section.peaks.length + `</b> <br>
+        <b>Duration: ` + section.duration + `</b> <br>
+        <b>Start: ` + section.start / section.samplingRate + `</b> <br>
+    `
+    sectionDiv.style.backgroundColor = section.color;
+    document.getElementById("sectionAnalysis").appendChild(sectionDiv);
+}
+//Get standardDeviation of intensity of sections
+function getStandardDev(data, dataAvg) {
+        var summation = 0;
+        if (dataAvg) {
+            for (var i = 0; i < data.length; i++) {
+                item = data[i];
+                summation = summation + ((item.intensity - dataAvg) * (item.intensity - dataAvg));
+            }
+        }
+        return Math.sqrt(summation / data.length);
+}
+
+function checkSection(currentTime, sections){
+    var currentSection = sections[0];
+    for(var i = 0; i < sections.length; i++){
+        if(currentTime >= ((sections[i].start/sections[i].samplingRate))){
+            currentSection = sections[i];
+        }
+    }
+    return currentSection;
+}
+
 
 
 

@@ -176,6 +176,8 @@ function worker_function() {
         var totalSectionDuration = 0;
         //Calculate Section BPM
         sections.forEach(function (section, index) {
+            //BPM is not required for this implementaiton, i dont think
+            /*
             var peaks = getPeaks(section.sectionData, section.samplingRate, 8);
             var groups = getIntervals(peaks, section.samplingRate);
             var top = groups.sort(function (intA, intB) {
@@ -188,10 +190,10 @@ function worker_function() {
             }
             totalSectionDuration = totalSectionDuration + section.duration;
             totalBPM = totalBPM + Math.abs(section.bpm * section.duration);
+            */
             section.avgVolume = getAvgVolume(section.sectionData);
         });
-        averageBPM = totalBPM / totalSongDuration;
-
+        //averageBPM = totalBPM / totalSongDuration;
         return sections;
     }
 
