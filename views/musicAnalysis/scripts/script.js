@@ -371,7 +371,7 @@ function getExampleAudio() {
 //Maybe? Have to load multiple songs
 function loadExampleSong(songName, index) {
     var xhr = new XMLHttpRequest();
-    var currentSong = new Song(songName, index)
+    var currentSong = new song(songName, index)
     xhr.open('GET', window.location.href + '/exampleSongs/' + songName, true);
     xhr.responseType = 'arraybuffer';
     xhr.onload = function (e) {
