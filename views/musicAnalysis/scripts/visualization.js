@@ -1,7 +1,7 @@
 var canvas = document.querySelector('canvas'),
     context = canvas.getContext('2d');
 canvas.height = canvas.width
-
+/*
 var centerX = canvas.width / 2;
 var centerY = canvas.height / 2;
 var radius = canvas.width / 2;
@@ -17,6 +17,7 @@ context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
 context.lineWidth = 2;
 context.strokeStyle = '#000000';
 context.stroke();
+*/
     var FFT_SIZE = 512;
 
 
