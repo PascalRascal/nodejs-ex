@@ -12,7 +12,7 @@
 
 <body>
     <h1 id="songName" class="text-center"> HIITunes </h1>
-    <div id="wordsForUser" class="text-center">  </div>
+    <div id="wordsForUser" class="text-center hidden">  </div>
     <div id="omniButton" class="text-center">
         
         <i id="omniButtonIcon" class="fa fa-plus-square-o omniButtonIconNoVisualization" aria-hidden="true"> 
@@ -26,36 +26,29 @@
         </p>
     </div>
 
-
-    <div class="userPrompts text-center">
-        <div>
-            Peaks per Second:
-            <input id="userPPS" type="number" max="10" value="4" />
+    <div id="vanishingAct">
+        <div class="userPrompts text-center">
+            <button id="altButton" class="btn-block" onclick="getExampleAudio()"> Analyze An Example Song! </button>
         </div>
-        <div>
-            Breadth of Section (Higher number means less sections):
-            <input id="userSectionMargin" type="number" max="5" value="1.25">
+        <div id="fileList" class="fileList">
         </div>
-        <button id="altButton" class="btn-block" onclick="getExampleAudio()"> Analyze An Example Song! </button>
-    </div>
-    <div id="fileList" class="fileList">
-    </div>
 
 
 
-    <div id="result">
+        <div id="result">
 
-        <audio id="audio" accept=".mp3"></audio>
-
-
-    </div>
+            <audio id="audio" accept=".mp3"></audio>
 
 
-
-    <div id="sectionAnalysis">
+        </div>
 
 
 
+        <div id="sectionAnalysis">
+
+
+
+        </div>
     </div>
 
     <script type="text/javascript" src="bower_components/mp3-parser/lib/lib.js"></script>

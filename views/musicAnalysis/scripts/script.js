@@ -15,7 +15,7 @@ var queryInput = document.querySelector('#query'),
     result = document.querySelector('#result'),
     text = document.querySelector('#text'),
     audioTag = document.querySelector('#audio')
-    audioPreview = document.getElementById('musicPreview'),
+audioPreview = document.getElementById('musicPreview'),
     fileList = document.getElementById("fileList"),
     omniButton = document.getElementById("omniButton"),
     omniButtonIcon = document.getElementById("omniButtonIcon"),
@@ -35,7 +35,7 @@ var myVisualizer;
 
 omniButton.mode = "fileUpload"
 
-function randomWord(words){
+function randomWord(words) {
     var rand = Math.floor(Math.random() * words.length);
     return words[rand];
 }
@@ -44,8 +44,12 @@ function randomWord(words){
 omniButton.addEventListener("click", function (ev) {
     if (omniButton.mode === "generateWorkout") {
         uploadFunction();
+        omniButton.mode = "generatingWorkout";
+        document.getElementById("vanishingAct").classList = "hidden";
     } else if (omniButton.mode === "startWorkout") {
         playBack();
+    } else if(omniButton.mode === "shareWorkout"){
+
     }
 })
 
@@ -87,24 +91,10 @@ function updateProgressState() {
     }
     var currentSection = checkSection(audioTag.currentTime, songs[songIndex].analyzedData.sections);
 
-    console.log(currentSection.start);
     if (currentSection != oldSection) {
         var sectionAnalysis = document.getElementById("sectionAnalysis");
-        if(currentSection.intensityDeviation > 1){
-            console.log("Color Changed");
-            startTransition(hex2Rgb(myVisualizer.barColor), hex2Rgb("#F2003C"), myVisualizer);
-            wordsForUser.innerHTML = randomWord(wordsOfEncouragement);
-        }
-        if(currentSection.intensityDeviation < 1){
-            console.log("Color Changed");
-            startTransition(hex2Rgb(myVisualizer.barColor), hex2Rgb("#273430"), myVisualizer);
-            wordsForUser.innerHTML = randomWord(wordsOfResting);
-        }
-        if(currentSection.intensityDeviation < 0){
-            console.log("Color Changed");
-            startTransition(hex2Rgb(myVisualizer.barColor), hex2Rgb("#194884"), myVisualizer);
-            wordsForUser.innerHTML = randomWord(wordsOfResting);
-        }
+        visualizeSection(currentSection);
+
         sectionAnalysis.innerHTML = '';
         drawSection(currentSection, currentSection.index);
         console.log("Section Changed!");
@@ -125,17 +115,20 @@ function switchSongs() {
         audioTag.src = songs[songIndex].songObjectURL
         audioTag.load();
         audioTag.play();
+    } else {
+        wordsForUser.innerHTML = "Great Work-Out!";
+        omniButtonIcon.classList = "fa fa-thumbs-o-up omniButtonIconVisualization";
     }
 
 
 }
 
-function switchSongsWithIndex(index){
+function switchSongsWithIndex(index) {
 
 }
 
 function updatePlayLabel() {
-    
+
 }
 
 audioTag.addEventListener('play', updatePlayLabel);
@@ -144,7 +137,7 @@ audioTag.addEventListener('pause', updatePlayLabel);
 function playBack() {
     if (audioTag.paused) {
         audioTag.play();
-        
+
         omniButtonIcon.classList = "fa fa-pause omniButtonIconVisualization";
     } else {
         audioTag.pause();
@@ -270,8 +263,8 @@ var getMusicData = function (musicArrayBuffer, songsize, samplingRate, currentSo
     });
 
     offlineContext.oncomplete = function (e) {
-        var userPPS = document.getElementById("userPPS").value;
-        var userSectionMargin = document.getElementById("userSectionMargin").value;
+        var userPPS = 4;
+        var userSectionMargin = 0.75;
 
         var analysisOptions = { partsPerSecond: userPPS, sectionMargin: userSectionMargin };
 
@@ -294,10 +287,13 @@ function showWorkOut(currentSong) {
         omniButtonPrompt.innerHTML = "Ready to go HAM"
         omniButton.mode = "startWorkout";
         oldSection = songs[songIndex].analyzedData.sections[0];
+        visualizeSection(oldSection);
         audioTag.src = songs[0].songObjectURL
+        wordsForUser.classList = "text-center";
+        wordsForUser.innerHTML = "LETS GO!";
     }
     polishSections(currentSong);
-    currentSong.analyzedData.sections.forEach(function(section,index){
+    currentSong.analyzedData.sections.forEach(function (section, index) {
         section.index = index;
     });
 
@@ -533,6 +529,37 @@ function polishSections(currentSong) {
         section.intensityDeviation = (section.intensity - avgIntensity) / intensityDev;
     });
 
+}
+
+function visualizeSection(currentSection) {
+    var sectionAnalysis = document.getElementById("sectionAnalysis");
+    var inDev = currentSection.intensityDeviation;
+    if (inDev > 1) {
+        console.log("Color Changed");
+        startTransition(hex2Rgb(myVisualizer.barColor), hex2Rgb("#FF0000"), myVisualizer);
+        myVisualizer.barHeight = 3;
+        wordsForUser.innerHTML = randomWord(wordsOfEncouragement);
+    }
+    if (inDev > 0 && inDev < 1) {
+        console.log("Color Changed");
+        myVisualizer.barHeight = 2.5;
+        startTransition(hex2Rgb(myVisualizer.barColor), hex2Rgb("#FF8300"), myVisualizer);
+        wordsForUser.innerHTML = randomWord(wordsOfEncouragement);
+    }
+
+    if (inDev < 0 && inDev > -0.5) {
+        console.log("Color Changed");
+        myVisualizer.barHeight = 2;
+        startTransition(hex2Rgb(myVisualizer.barColor), hex2Rgb("#194884"), myVisualizer);
+        wordsForUser.innerHTML = randomWord(wordsOfResting);
+    }
+    if (inDev < -0.5) {
+        console.log("Color Changed");
+        myVisualizer.barHeight = 2;
+        startTransition(hex2Rgb(myVisualizer.barColor), hex2Rgb("#FF00FF"), myVisualizer);
+        wordsForUser.innerHTML = randomWord(wordsOfResting);
+    }
+    sectionAnalysis.innerHTML = '';
 }
 
 

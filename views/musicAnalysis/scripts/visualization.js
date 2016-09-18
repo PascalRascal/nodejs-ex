@@ -134,10 +134,15 @@ Visualizer.prototype.setCanvasStyles = function () {
     this.gradient = this.canvasCtx.createLinearGradient(0, 0, 0, 300);
     this.gradient.addColorStop(1, this.barColor);
     this.canvasCtx.fillStyle = this.gradient;
-    this.canvasCtx.shadowBlur = this.shadowBlur;
-    this.canvasCtx.shadowColor = this.shadowColor;
     this.canvasCtx.font = this.font.join(' ');
     this.canvasCtx.textAlign = 'center';
+    try{
+            this.canvasCtx.shadowBlur = this.shadowBlur;
+            this.canvasCtx.shadowColor = this.shadowColor;
+    }catch(error){
+        this.canvasCtx.shadowBlur = "#FF00FF";
+        this.canvasCtx.shadowColor = "#FF00FF";
+    }
     return this;
 };
 

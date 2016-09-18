@@ -15,7 +15,7 @@
 
 #wordsForUser{
 	font-size: 4vw;
-	height: 9vw;
+	height: 12vw;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	display: -webkit-box;
@@ -62,6 +62,7 @@
 }
 .fileEntry{
 	background-color:#6E6E6E;
+	color: #ffffff;
 	width: 50%;
 	margin: auto;
 	padding: 1vmin;

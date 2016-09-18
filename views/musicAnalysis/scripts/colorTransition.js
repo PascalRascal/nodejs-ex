@@ -75,12 +75,24 @@ function calculateIncrement(distanceArray, fps, duration) {
 // It's easier to apply HEX color than RGB color.
 function rgb2hex(colorArray) {
 	var color = [];
+	for(var i = 0; i < colorArray.length; i++){
+		if(colorArray[i] == 256){
+			colorArray[i] = 255;
+		}
+		if(colorArray[i] == -1){
+			colorArray[i] = 0;
+		}
+	}
 	for (var i = 0; i < colorArray.length; i++) {
 		var hex = colorArray[i].toString(16);
 		if (hex.length < 2) { hex = "0" + hex; }
 		color.push(hex);
 	}
-	return "#" + color.join("");
+	var hexString = "#" + color.join("");
+	if(hexString == "#ff79-1"){
+		console.log(colorArray);
+	}
+	return hexString
 }
 
 function hex2Rgb(hex) {
@@ -100,7 +112,6 @@ var duration		= 3;
 var transElement	= document.body;
 var transHandler	= null;
 
-startTransition();
 
 /* ==================== Transition Initiator ==================== */
 function startTransition(currentColor, targetColor, visualizer) {
