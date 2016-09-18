@@ -42,9 +42,9 @@ function Visualizer(cfg) {
     this.barWidth = cfg.barWidth || 2;
     this.barHeight = cfg.barHeight || 2;
     this.barSpacing = cfg.barSpacing || 5;
-    this.barColor = cfg.barColor || '#ffffff';
+    this.barColor = cfg.barColor || '#FF00FF';
     this.shadowBlur = cfg.shadowBlur || 10;
-    this.shadowColor = cfg.shadowColor || '#ffffff';
+    this.shadowColor = cfg.shadowColor || '#FF00FF';
     this.font = cfg.font || ['12px', 'Helvetica'];
     this.gradient = null;
 }

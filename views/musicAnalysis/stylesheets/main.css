@@ -3,12 +3,12 @@
 	font-family: Helvetica, Arial;
 }
 #omniButton{
-	color: #da9f93;
+	color: #ffffff;
 	text-shadow: 1px 1px 1px;
-    font-size: 23vw;
+    font-size: 22vw;
 	overflow: visible;
     position: relative;
-	margin: auto;
+	margin:auto;
 	width: 50%;
 	cursor: pointer;
 }
@@ -16,18 +16,27 @@
 #omniButtonPrompt{
 	font-size: 1em;
 }
-#omniButtonIcon{
+
+.omniButtonIconNoVisualization{
 	z-index: 2;
 	position: relative;
-	padding-top: 15vw;
+	padding-top: 0.95vw;
+	width: 25vw;
+	height: 25vw;
+	overflow: visible;
+}
+.omniButtonIconVisualization{
+	z-index: 2;
+	position: relative;
 	width: 50vw;
 	height: 50vw;
 	overflow: visible;
+
 }
 
 #musicVisualizer{
 	z-index: 4;
-	top: 0;
+	top: -15vw;
 	left: 0;
 	display: block;
 	position: absolute;
@@ -40,7 +49,7 @@
 	width: 50%;
 }
 .fileEntry{
-	background-color:#b6465f;
+	background-color:#6E6E6E;
 	width: 50%;
 	margin: auto;
 	padding: 1vmin;
@@ -51,7 +60,7 @@
 }
 
 #altButton{
-	background-color: #2c0703;
+	background-color: #3F3F3F;
 	border: none;
 	padding: 5px;
 }
@@ -78,8 +87,8 @@
 body {
 	font-size: 14px;
 	margin: 0 auto;
-	background: #890620;
-	color:#ebd4cb
+	background: #040404;
+	color:#6e6e6e;
 }
 
 @media (min-width: 600px) {

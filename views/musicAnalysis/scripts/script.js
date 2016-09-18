@@ -48,7 +48,7 @@ function updateFileList() {
     }
 
 
-    omniButtonIcon.classList = "fa fa-cog";
+    omniButtonIcon.classList = "fa fa-cog omniButtonIconNoVisualization";
     omniButton.mode = "generateWorkout";
     omniButtonPrompt.innerHTML = "Analyze Your Awesome Songs"
     fileUpload.classList += " hidden";
@@ -122,10 +122,10 @@ function playBack() {
     if (audioTag.paused) {
         audioTag.play();
         
-        omniButtonIcon.classList = "fa fa-pause";
+        omniButtonIcon.classList = "fa fa-pause omniButtonIconVisualization";
     } else {
         audioTag.pause();
-        omniButtonIcon.classList = "fa fa-play";
+        omniButtonIcon.classList = "fa fa-play omniButtonIconVisualization";
     }
 }
 
@@ -135,7 +135,7 @@ result.style.display = 'none';
 
 //Trims the data and removes any irrelevant meta-data, also gets the sampling rate about the song
 function handleArrayBuffer(musicArrayBuffer, currentSong) {
-    omniButtonIcon.classList = "fa fa-cog fa-spin"
+    omniButtonIcon.classList = "fa fa-cog fa-spin omniButtonIconNoVisualization"
     omniButtonPrompt.innerHTML = "Analyzing Your Awesome Songs"
 
 
@@ -267,7 +267,7 @@ function showWorkOut(currentSong) {
         myVisualizer.renderFrame();
         console.log(songs);
         result.style.display = 'block';
-        omniButtonIcon.classList = "fa fa-play";
+        omniButtonIcon.classList = "fa fa-play omniButtonIconVisualization";
         omniButtonPrompt.innerHTML = "Ready to go HAM"
         omniButton.mode = "startWorkout";
         oldSection = songs[songIndex].analyzedData.sections[0];
