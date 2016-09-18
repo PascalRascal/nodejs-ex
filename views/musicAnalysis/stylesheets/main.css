@@ -13,6 +13,18 @@
 	cursor: pointer;
 }
 
+#wordsForUser{
+	font-size: 4vw;
+	height: 9vw;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2; /* number of lines to show */
+	width:50%;
+	margin:auto;
+}
+
 #omniButtonPrompt{
 	font-size: 1em;
 }

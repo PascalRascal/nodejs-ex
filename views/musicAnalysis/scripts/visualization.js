@@ -44,7 +44,7 @@ function Visualizer(cfg) {
     this.barSpacing = cfg.barSpacing || 5;
     this.barColor = cfg.barColor || '#FF00FF';
     this.shadowBlur = cfg.shadowBlur || 10;
-    this.shadowColor = cfg.shadowColor || '#FF00FF';
+    this.shadowColor = this.barColor;
     this.font = cfg.font || ['12px', 'Helvetica'];
     this.gradient = null;
 }

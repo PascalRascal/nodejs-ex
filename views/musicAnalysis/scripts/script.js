@@ -28,9 +28,17 @@ var songs = [];
 var songsAnalyzed = 0;
 var oldSection;
 var songIndex = 0;
+var wordsForUser = document.getElementById("wordsForUser");
+var wordsOfEncouragement = ["GO", "KEEP IT UP", "GO HAM", "DIG DEEP", "FASTER STRONGER HARDER", "GOGOGOGOGO", "YOU GOT THIS", "PIERCE THE HEAVENS", "YOU'RE A MANIAC", "LEAVE MANKIND BEHIND"];
+var wordsOfResting = ["Take a breather", "Enjoy the song", "Get hyped and get ready", "You're doing great", "Get ready", "Round ??? coming up!"];
 var myVisualizer;
 
 omniButton.mode = "fileUpload"
+
+function randomWord(words){
+    var rand = Math.floor(Math.random() * words.length);
+    return words[rand];
+}
 
 //Controls for the Omni-Button
 omniButton.addEventListener("click", function (ev) {
@@ -82,6 +90,21 @@ function updateProgressState() {
     console.log(currentSection.start);
     if (currentSection != oldSection) {
         var sectionAnalysis = document.getElementById("sectionAnalysis");
+        if(currentSection.intensityDeviation > 1){
+            console.log("Color Changed");
+            startTransition(hex2Rgb(myVisualizer.barColor), hex2Rgb("#F2003C"), myVisualizer);
+            wordsForUser.innerHTML = randomWord(wordsOfEncouragement);
+        }
+        if(currentSection.intensityDeviation < 1){
+            console.log("Color Changed");
+            startTransition(hex2Rgb(myVisualizer.barColor), hex2Rgb("#273430"), myVisualizer);
+            wordsForUser.innerHTML = randomWord(wordsOfResting);
+        }
+        if(currentSection.intensityDeviation < 0){
+            console.log("Color Changed");
+            startTransition(hex2Rgb(myVisualizer.barColor), hex2Rgb("#194884"), myVisualizer);
+            wordsForUser.innerHTML = randomWord(wordsOfResting);
+        }
         sectionAnalysis.innerHTML = '';
         drawSection(currentSection, currentSection.index);
         console.log("Section Changed!");
