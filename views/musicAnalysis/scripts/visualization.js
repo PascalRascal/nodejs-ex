@@ -158,9 +158,9 @@ Visualizer.prototype.renderFrame = function () {
     * Render lounge style type.
     */
 Visualizer.prototype.renderLounge = function () {
-    var cx = this.canvas.width / 2;
-    var cy = this.canvas.height / 2;
-    var radius = 140;
+    var cx = (this.canvas.width / 2);
+    var cy = (this.canvas.height / 2);
+    var radius = 100;
     var maxBarNum = Math.floor((radius * 2 * Math.PI) / (this.barWidth + this.barSpacing));
     var slicedPercent = Math.floor((maxBarNum * 25) / 100);
     var barNum = maxBarNum - slicedPercent;
