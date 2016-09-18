@@ -1,5 +1,5 @@
-﻿﻿
-<html>
+﻿﻿<html>
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Finding out the BPM of a song using Javascript</title>
@@ -9,13 +9,15 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/main.css">
     <meta name="description" content="Demo of an algorithm to calculate tempo of a track using the Audio API.">
 </head>
+
 <body>
     <h1 class="text-center"> HIITunes </h1>
     <div id="omniButton" class="text-center">
-        <span>
-            <i id="omniButtonIcon" class="fa fa-plus-square-o" aria-hidden="true">  </i>
-            <input class="fileInput" type="file" id="drop_zone" accept=".mp3" onchange="updateFileList()" multiple/>
-        </span>
+        
+        <i id="omniButtonIcon" class="fa fa-plus-square-o" aria-hidden="true"> 
+            <canvas id="musicVisualizer"></canvas> 
+        </i>
+        <input class="fileInput" type="file" id="drop_zone" accept=".mp3" onchange="updateFileList()" multiple/>
     </div>
     <div id="omniButtonPrompt" class="text-center">
         <p>
@@ -27,9 +29,9 @@
     <div class="userPrompts text-center">
         <div>
             Peaks per Second:
-            <input id="userPPS" type="number" max="10" value="4"/>
+            <input id="userPPS" type="number" max="10" value="4" />
         </div>
-            <div>
+        <div>
             Breadth of Section (Higher number means less sections):
             <input id="userSectionMargin" type="number" max="5" value="1.25">
         </div>
@@ -41,20 +43,12 @@
 
 
     <div id="result">
-        <div id="text"></div>
-        <div id="durationTracker"></div>
-        <div>
-            <svg width="100%" height="40" id="svg"></svg>
-            <button id="play">Play track</button>
-        </div>
-
-
 
         <audio id="audio" accept=".mp3"></audio>
 
 
     </div>
-    
+
 
 
     <div id="sectionAnalysis">
@@ -69,5 +63,7 @@
     <script type="text/javascript" src="bower_components/mp3-parser/main.js"></script>
     <script src="scripts/musicWorker/musicWorker.js"></script>
     <script src="scripts/script.js"></script>
+    <script src="scripts/visualization.js"></script>
 </body>
+
 </html>

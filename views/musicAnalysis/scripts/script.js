@@ -14,8 +14,7 @@
 var queryInput = document.querySelector('#query'),
     result = document.querySelector('#result'),
     text = document.querySelector('#text'),
-    audioTag = document.querySelector('#audio'),
-    playButton = document.querySelector('#play'),
+    audioTag = document.querySelector('#audio')
     audioPreview = document.getElementById('musicPreview'),
     fileList = document.getElementById("fileList"),
     omniButton = document.getElementById("omniButton"),
@@ -28,6 +27,9 @@ var fileUpload = document.getElementById("drop_zone");
 var songs = [];
 var songsAnalyzed = 0;
 var oldSection;
+var songIndex = 0;
+var myVisualizer;
+
 omniButton.mode = "fileUpload"
 
 //Controls for the Omni-Button
@@ -75,30 +77,51 @@ function updateProgressState() {
         document.getElementById("durationTracker").innerHTML = Math.floor(audioTag.currentTime) + " / " + audioTag.duration;
         progressIndicator.setAttribute('x', (audioTag.currentTime * 100 / audioTag.duration) + '%');
     }
-    var currentSection = checkSection(audioTag.currentTime, songs[0].analyzedData.sections);
+    var currentSection = checkSection(audioTag.currentTime, songs[songIndex].analyzedData.sections);
 
     console.log(currentSection.start);
-    if(currentSection != oldSection){
+    if (currentSection != oldSection) {
+        var sectionAnalysis = document.getElementById("sectionAnalysis");
+        sectionAnalysis.innerHTML = '';
+        drawSection(currentSection, currentSection.index);
         console.log("Section Changed!");
         oldSection = currentSection;
     }
 
     requestAnimationFrame(updateProgressState);
 }
+
 audioTag.addEventListener('play', updateProgressState);
 audioTag.addEventListener('playing', updateProgressState);
+audioTag.addEventListener('ended', switchSongs);
+function switchSongs() {
+
+    songIndex++;
+    if (songs[songIndex]) {
+        console.log("Switching Song");
+        audioTag.src = songs[songIndex].songObjectURL
+        audioTag.load();
+        audioTag.play();
+    }
+
+
+}
+
+function switchSongsWithIndex(index){
+
+}
 
 function updatePlayLabel() {
-    playButton.innerHTML = audioTag.paused ? 'Play track' : 'Pause track';
+    
 }
 
 audioTag.addEventListener('play', updatePlayLabel);
 audioTag.addEventListener('playing', updatePlayLabel);
 audioTag.addEventListener('pause', updatePlayLabel);
-audioTag.addEventListener('ended', updatePlayLabel);
 function playBack() {
     if (audioTag.paused) {
         audioTag.play();
+        
         omniButtonIcon.classList = "fa fa-pause";
     } else {
         audioTag.pause();
@@ -106,13 +129,7 @@ function playBack() {
     }
 }
 
-playButton.addEventListener('click', function () {
-    if (audioTag.paused) {
-        audioTag.play();
-    } else {
-        audioTag.pause();
-    }
-});
+
 
 result.style.display = 'none';
 
@@ -157,10 +174,11 @@ function handleArrayBuffer(musicArrayBuffer, currentSong) {
     //Clear up memory
     musicDataView = null;
     //Put the data into the audiotag
-    var songBlob = new Blob([musicArrayBuffer], { type: "audio/mpeg3" });
 
     currentSong.musicArrayBuffer = musicArrayBuffer;
-    audioTag.src = window.URL.createObjectURL(songBlob);
+    var songBlob = new Blob([musicArrayBuffer], { type: "audio/mpeg3" });
+    currentSong.songObjectURL = window.URL.createObjectURL(songBlob);
+
     getMusicData(musicArrayBuffer, sampleCount, samplingRate, currentSong);
     songs.push(currentSong);
 
@@ -243,69 +261,25 @@ var getMusicData = function (musicArrayBuffer, songsize, samplingRate, currentSo
 function showWorkOut(currentSong) {
     var totalDeviation = 0;
     var maximumDeviation = 0;
-    var totalDurationOriginal = 0;
-    var totalDurationNew = 0;
     if (isProcessingDone()) {
         console.log("All songs have been processed!");
+        myVisualizer = _createVisualizer({});
+        myVisualizer.renderFrame();
         console.log(songs);
         result.style.display = 'block';
         omniButtonIcon.classList = "fa fa-play";
         omniButtonPrompt.innerHTML = "Ready to go HAM"
         omniButton.mode = "startWorkout";
-        oldSection = songs[0].analyzedData.sections[0];
-
-        for(var i = 0; i < currentSong.analyzedData.sections.length; i++){
-            var currentSection = currentSong.analyzedData.sections[i];
-            totalDurationOriginal = totalDurationOriginal + currentSection.duration;
-            currentSection.intensity = currentSection.peaks.length / currentSection.duration;
-        }
-        //Combines sections of they are too short
-        //Skips the first and last section
-        for(var i = 1; i < currentSong.analyzedData.sections.length - 1; i++){
-            var currentSection = currentSong.analyzedData.sections[i];
-            if(currentSection.duration < 3){
-                //If the intensity is closer to the next section, then merge them AND its not the last section
-                if((Math.abs(currentSection.intensity - currentSong.analyzedData.sections[i + 1].intensity) >  Math.abs(currentSection.intensity - currentSong.analyzedData.sections[i - 1].intensity))){
-                    combineSection(i, i + 1, currentSong.analyzedData.sections);
-                }else{
-                    combineSection(i - 1, i, currentSong.analyzedData.sections);
-                    i--;
-                }
-            }
-        }
-        for(var i = 1; i < currentSong.analyzedData.sections.length - 1; i++){
-            var currentSection = currentSong.analyzedData.sections[i];
-            if(currentSection.duration < 3){
-                //If the intensity is closer to the next section, then merge them AND its not the last section
-                if((Math.abs(currentSection.intensity - currentSong.analyzedData.sections[i + 1].intensity) >  Math.abs(currentSection.intensity - currentSong.analyzedData.sections[i - 1].intensity))){
-                    combineSection(i, i + 1, currentSong.analyzedData.sections);
-                }else{
-                    combineSection(i - 1, i, currentSong.analyzedData.sections);
-                    i--;
-                }
-            }
-        }
-        
-        for(var i = 0; i < currentSong.analyzedData.sections.length; i++){
-            var currentSection = currentSong.analyzedData.sections[i];
-            totalDurationNew = totalDurationNew + currentSection.duration;
-        }
+        oldSection = songs[songIndex].analyzedData.sections[0];
+        audioTag.src = songs[0].songObjectURL
     }
-    var totalIntensity = 0;
-    currentSong.analyzedData.sections.forEach(function(section){
-        totalIntensity = totalIntensity + section.intensity;
+    polishSections(currentSong);
+    currentSong.analyzedData.sections.forEach(function(section,index){
+        section.index = index;
     });
-    var avgIntensity = totalIntensity / currentSong.analyzedData.sections.length;
-    console.log("Average Intensity: " + avgIntensity);
-    var intensityDev = getStandardDev(currentSong.analyzedData.sections, avgIntensity);
 
-    currentSong.analyzedData.sections.forEach(function(section, index){
-        section.intensityDeviation = (section.intensity - avgIntensity) / intensityDev;
-        drawSection(section, index);
-    });
-    console.log(currentSong);
-    console.log(totalDurationOriginal);
-    console.log(totalDurationNew);
+
+
 }
 
 
@@ -422,8 +396,8 @@ function isProcessingDone() {
 
 //Combines two sections
 //Assume that i < j
-function combineSection(i, j, sections){
-    if(sections[i] && sections[j]){
+function combineSection(i, j, sections) {
+    if (sections[i] && sections[j]) {
         console.log("Starting to slice the sections")
         //Combine the easy things
         var newStart = sections[i].start;
@@ -453,9 +427,7 @@ function combineSection(i, j, sections){
 function drawSection(section, index) {
     sectionDiv = document.createElement("div");
     sectionDiv.addEventListener("click", function () {
-        var progressIndicator = document.querySelector('#progress');
         audioTag.currentTime = section.start / section.samplingRate;
-        progressIndicator.setAttribute('x', (audioTag.currentTime * 100 / audioTag.duration) + '%');
         console.log(section);
     })
     sectionDiv.className = "songSection";
@@ -472,24 +444,72 @@ function drawSection(section, index) {
 }
 //Get standardDeviation of intensity of sections
 function getStandardDev(data, dataAvg) {
-        var summation = 0;
-        if (dataAvg) {
-            for (var i = 0; i < data.length; i++) {
-                item = data[i];
-                summation = summation + ((item.intensity - dataAvg) * (item.intensity - dataAvg));
-            }
+    var summation = 0;
+    if (dataAvg) {
+        for (var i = 0; i < data.length; i++) {
+            item = data[i];
+            summation = summation + ((item.intensity - dataAvg) * (item.intensity - dataAvg));
         }
-        return Math.sqrt(summation / data.length);
+    }
+    return Math.sqrt(summation / data.length);
 }
 
-function checkSection(currentTime, sections){
+function checkSection(currentTime, sections) {
     var currentSection = sections[0];
-    for(var i = 0; i < sections.length; i++){
-        if(currentTime >= ((sections[i].start/sections[i].samplingRate))){
+    for (var i = 0; i < sections.length; i++) {
+        if (currentTime >= ((sections[i].start / sections[i].samplingRate))) {
             currentSection = sections[i];
         }
     }
     return currentSection;
+}
+
+function polishSections(currentSong) {
+    for (var i = 0; i < currentSong.analyzedData.sections.length; i++) {
+        var currentSection = currentSong.analyzedData.sections[i];
+        currentSection.intensity = currentSection.peaks.length / currentSection.duration;
+    }
+    //Combines sections of they are too short
+    //Skips the first and last section
+    for (var i = 1; i < currentSong.analyzedData.sections.length - 1; i++) {
+        var currentSection = currentSong.analyzedData.sections[i];
+        if (currentSection.duration < 3) {
+            //If the intensity is closer to the next section, then merge them AND its not the last section
+            if ((Math.abs(currentSection.intensity - currentSong.analyzedData.sections[i + 1].intensity) > Math.abs(currentSection.intensity - currentSong.analyzedData.sections[i - 1].intensity))) {
+                combineSection(i, i + 1, currentSong.analyzedData.sections);
+            } else {
+                combineSection(i - 1, i, currentSong.analyzedData.sections);
+                i--;
+            }
+        }
+    }
+    for (var i = 1; i < currentSong.analyzedData.sections.length - 1; i++) {
+        var currentSection = currentSong.analyzedData.sections[i];
+        if (currentSection.duration < 3) {
+            //If the intensity is closer to the next section, then merge them AND its not the last section
+            if ((Math.abs(currentSection.intensity - currentSong.analyzedData.sections[i + 1].intensity) > Math.abs(currentSection.intensity - currentSong.analyzedData.sections[i - 1].intensity))) {
+                combineSection(i, i + 1, currentSong.analyzedData.sections);
+            } else {
+                combineSection(i - 1, i, currentSong.analyzedData.sections);
+                i--;
+            }
+        }
+    }
+
+    for (var i = 0; i < currentSong.analyzedData.sections.length; i++) {
+        var currentSection = currentSong.analyzedData.sections[i];
+    }
+    var totalIntensity = 0;
+    currentSong.analyzedData.sections.forEach(function (section) {
+        totalIntensity = totalIntensity + section.intensity;
+    });
+    var avgIntensity = totalIntensity / currentSong.analyzedData.sections.length;
+    console.log("Average Intensity: " + avgIntensity);
+    var intensityDev = getStandardDev(currentSong.analyzedData.sections, avgIntensity);
+    currentSong.analyzedData.sections.forEach(function (section, index) {
+        section.intensityDeviation = (section.intensity - avgIntensity) / intensityDev;
+    });
+
 }
 
 

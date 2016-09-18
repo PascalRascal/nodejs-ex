@@ -5,16 +5,32 @@
 #omniButton{
 	color: #da9f93;
 	text-shadow: 1px 1px 1px;
-    font-size: 25vmax;
-	overflow: hidden;
+	display:block;
+    font-size: 24vw;
     position: relative;
 	margin: auto;
-	width: 25%;
+	width: 50%;
 	cursor: pointer;
 }
 
 #omniButtonPrompt{
 	font-size: 1em;
+}
+#omniButtonIcon{
+	z-index: 2;
+	position: relative;
+	padding-top: 3vw;
+	width: 30vw;
+	height: 30vw;
+}
+
+#musicVisualizer{
+	z-index: 1;
+	top: 0;
+	left: 0;
+	position: absolute;
+	width: 100%;
+	height: 100%;
 }
 .userPrompts{
 	margin: auto;
@@ -39,14 +55,15 @@
 
 .fileInput {
     cursor: pointer;
-    height: 100%;
-	width: 100%;
     position:absolute;
     top: 0;
     right: 0;
     /*This makes the button huge so that it can be clicked on*/
 	font-size: 1vw;
 	/*Opacity settings for all browsers*/
+	z-index: 2;
+	width: 100%;
+	height: 100%;
 
 	opacity: 0;
     -moz-opacity: 0;
