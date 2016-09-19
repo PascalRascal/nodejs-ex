@@ -110,7 +110,7 @@ app.get('/api/motivation', function (req, res) {
             res.send("RUH ROH");
           }
           console.log(items);
-          res.send('{ words: ' + stringify(items) + '}');
+          res.send(items);
      });;
 
   }
