@@ -1,28 +1,30 @@
 //  OpenShift sample Node application
 var express = require('express'),
-    fs      = require('fs'),
-    app     = express(),
-    eps     = require('ejs'),
-    morgan  = require('morgan');
-    
-Object.assign=require('object-assign')
+  fs = require('fs'),
+  app = express(),
+  eps = require('ejs'),
+  morgan = require('morgan'),
+  bodyParser = require('body-parser');
+
+Object.assign = require('object-assign')
 
 app.engine('html', require('ejs').renderFile);
 app.use(morgan('combined'))
 app.use('/musicFun', express.static('views/musicAnalysis'));
+app.use(bodyParser.json());
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
-    ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
-    mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
-    mongoURLLabel = "";
+  ip = process.env.IP || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
+  mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
+  mongoURLLabel = "";
 
 if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
   var mongoServiceName = process.env.DATABASE_SERVICE_NAME.toUpperCase(),
-      mongoHost = process.env[mongoServiceName + '_SERVICE_HOST'],
-      mongoPort = process.env[mongoServiceName + '_SERVICE_PORT'],
-      mongoDatabase = process.env[mongoServiceName + '_DATABASE'],
-      mongoPassword = process.env[mongoServiceName + '_PASSWORD']
-      mongoUser = process.env[mongoServiceName + '_USER'];
+    mongoHost = process.env[mongoServiceName + '_SERVICE_HOST'],
+    mongoPort = process.env[mongoServiceName + '_SERVICE_PORT'],
+    mongoDatabase = process.env[mongoServiceName + '_DATABASE'],
+    mongoPassword = process.env[mongoServiceName + '_PASSWORD']
+  mongoUser = process.env[mongoServiceName + '_USER'];
 
   if (mongoHost && mongoPort && mongoDatabase) {
     mongoURLLabel = mongoURL = 'mongodb://';
@@ -31,20 +33,20 @@ if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
     }
     // Provide UI label that excludes user id and pw
     mongoURLLabel += mongoHost + ':' + mongoPort + '/' + mongoDatabase;
-    mongoURL += mongoHost + ':' +  mongoPort + '/' + mongoDatabase;
+    mongoURL += mongoHost + ':' + mongoPort + '/' + mongoDatabase;
 
   }
 }
 var db = null,
-    dbDetails = new Object();
+  dbDetails = new Object();
 
-var initDb = function(callback) {
+var initDb = function (callback) {
   if (mongoURL == null) return;
 
   var mongodb = require('mongodb');
   if (mongodb == null) return;
 
-  mongodb.connect(mongoURL, function(err, conn) {
+  mongodb.connect(mongoURL, function (err, conn) {
     if (err) {
       callback(err);
       return;
@@ -63,17 +65,17 @@ app.get('/', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
   if (!db) {
-    initDb(function(err){});
+    initDb(function (err) { });
   }
   if (db) {
     var col = db.collection('counts');
     // Create a document with request IP and current time of request
-    col.insert({ip: req.ip, date: Date.now()});
-    col.count(function(err, count){
-      res.render('core/index.html', { pageCountMessage : count, dbInfo: dbDetails });
+    col.insert({ ip: req.ip, date: Date.now() });
+    col.count(function (err, count) {
+      res.render('core/index.html', { pageCountMessage: count, dbInfo: dbDetails });
     });
   } else {
-    res.render('core/index.html', { pageCountMessage : null});
+    res.render('core/index.html', { pageCountMessage: null });
   }
 });
 
@@ -81,10 +83,10 @@ app.get('/pagecount', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
   if (!db) {
-    initDb(function(err){});
+    initDb(function (err) { });
   }
   if (db) {
-    db.collection('counts').count(function(err, count ){
+    db.collection('counts').count(function (err, count) {
       res.send('{ pageCount: ' + count + '}');
     });
   } else {
@@ -92,29 +94,58 @@ app.get('/pagecount', function (req, res) {
   }
 });
 
-app.get('/musicfun', function (req, res){
-    res.render('musicAnalysis/index.html');
+app.get('/musicfun', function (req, res) {
+  res.render('musicAnalysis/index.html');
 })
-//TODO: Make accounts rofl
-app.post('/register', function(req, res){
 
+app.get('/api/motivation', function (req, res) {
+  if (!db) {
+    initDb();
+  } else {
+    var wordsDB = db.collection('motivationQuotes');
+    var motivationWords = wordsDB.aggregate([ {$sample:{ size: 3}} ]);
+    res.send('{ words: ' + motivationWords + '}');
+
+  }
 })
-//TODO: Make accounts rofl
-app.post('/login', function(req, res){
 
+app.get('/api/support', function (req, res) {
+  if (!db) {
+    initDb();
+  } else {
+    var wordsDB = db.collection('supportQuotes');
+
+  }
+});
+
+app.post('/api/motivation', function (req, res) {
+  if (!db) {
+    initDb();
+  } else {
+      var wordsDB = db.collection('supportQuotes');
+
+  }
+});
+
+app.post('/api/support', function (req, res) {
+  if (!db) {
+    initDb();
+  } else {
+
+  }
 })
 
 // error handling
-app.use(function(err, req, res, next){
+app.use(function (err, req, res, next) {
   console.error(err.stack);
   res.status(500).send('Something bad happened!');
 });
 
-initDb(function(err){
-  console.log('Error connecting to Mongo. Message:\n'+err);
+initDb(function (err) {
+  console.log('Error connecting to Mongo. Message:\n' + err);
 });
 
 app.listen(port, ip);
 console.log('Server running on http://%s:%s', ip, port);
 
-module.exports = app ;
+module.exports = app;
