@@ -45,7 +45,6 @@ omniButton.addEventListener("click", function (ev) {
     if (omniButton.mode === "generateWorkout") {
         uploadFunction();
         omniButton.mode = "generatingWorkout";
-        document.getElementById("vanishingAct").classList = "hidden";
     } else if (omniButton.mode === "startWorkout") {
         playBack();
     } else if(omniButton.mode === "shareWorkout"){
@@ -279,6 +278,7 @@ function showWorkOut(currentSong) {
     var maximumDeviation = 0;
     if (isProcessingDone()) {
         console.log("All songs have been processed!");
+        document.getElementById("vanishingAct").classList = "hidden";
         myVisualizer = _createVisualizer({});
         myVisualizer.renderFrame();
         console.log(songs);

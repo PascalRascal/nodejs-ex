@@ -4,7 +4,9 @@ var express = require('express'),
   app = express(),
   eps = require('ejs'),
   morgan = require('morgan'),
-  bodyParser = require('body-parser');
+  bodyParser = require('body-parser'),
+  stringify = require('node-stringify');
+
 
 Object.assign = require('object-assign')
 
@@ -103,8 +105,13 @@ app.get('/api/motivation', function (req, res) {
     initDb();
   } else {
     var wordsDB = db.collection('motivationQuotes');
-    var motivationWords = wordsDB.aggregate([ {$sample:{ size: 3}} ]);
-    res.send('{ words: ' + JSON.stringify(motivationWords) + '}');
+     wordsDB.aggregate([ {$sample:{ size: 3}} ]).toArray(function(err, items){
+          if(err){
+            res.send("RUH ROH");
+          }
+          console.log(items);
+          res.send('{ words: ' + stringify(items) + '}');
+     });;
 
   }
 })
@@ -114,7 +121,7 @@ app.get('/api/support', function (req, res) {
     initDb();
   } else {
     var wordsDB = db.collection('supportQuotes');
-
+    res.send("Hey");
   }
 });
 
