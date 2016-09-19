@@ -129,7 +129,12 @@ app.post('/api/motivation', function (req, res) {
   if (!db) {
     initDb();
   } else {
-      var wordsDB = db.collection('supportQuotes');
+     var wordsDB = db.collection('motivationQuotes');
+      wordsDB.insertOne({
+        "quote": req.body.motivationQuote
+      }, function(err, result){
+        res.send("Document Inserted!");
+      });
 
   }
 });
