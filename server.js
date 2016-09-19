@@ -104,7 +104,7 @@ app.get('/api/motivation', function (req, res) {
   } else {
     var wordsDB = db.collection('motivationQuotes');
     var motivationWords = wordsDB.aggregate([ {$sample:{ size: 3}} ]);
-    res.send('{ words: ' + motivationWords + '}');
+    res.send('{ words: ' + JSON.stringify(motivationWords) + '}');
 
   }
 })
