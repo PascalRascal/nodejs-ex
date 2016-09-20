@@ -35,6 +35,22 @@ var myVisualizer;
 
 omniButton.mode = "fileUpload"
 
+var xhr = new XMLHttpRequest();
+
+xhr.onreadystatechange = function(){
+    if(this.readyState == 4 && this.status == 200){
+        var memes = JSON.parse(this.responseText);
+        console.log(memes);
+    }else{
+        console.log("Woops!");
+    }
+}
+
+xhr.open("/api/motivation");
+xhr.send();
+
+
+
 function randomWord(words) {
     var rand = Math.floor(Math.random() * words.length);
     return words[rand];
@@ -115,7 +131,8 @@ function switchSongs() {
         audioTag.load();
         audioTag.play();
     } else {
-        wordsForUser.innerHTML = "Great Work-Out!";
+        wordsForUser.innerHTML = "Great Work-Out! Click to share some words of encouragement";
+        omniButtonIcon.mode = "shareWords";
         omniButtonIcon.classList = "fa fa-thumbs-o-up omniButtonIconVisualization";
     }
 
