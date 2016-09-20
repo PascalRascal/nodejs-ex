@@ -94,7 +94,7 @@ function getRestingQuotes() {
     xhr.send();
 }
 
-}
+
 
 
 
