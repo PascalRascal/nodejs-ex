@@ -5,7 +5,9 @@ var express = require('express'),
   eps = require('ejs'),
   morgan = require('morgan'),
   bodyParser = require('body-parser'),
-  stringify = require('node-stringify');
+  stringify = require('node-stringify'),
+  Filter = require('bad-words'),
+  filter = new Filter();
 
 
 Object.assign = require('object-assign')
@@ -99,19 +101,19 @@ app.get('/pagecount', function (req, res) {
 app.get('/musicfun', function (req, res) {
   res.render('musicAnalysis/index.html');
 })
-
+12
 app.get('/api/motivation', function (req, res) {
   if (!db) {
     initDb();
   } else {
     var wordsDB = db.collection('motivationQuotes');
-     wordsDB.aggregate([ {$sample:{ size: 3}} ]).toArray(function(err, items){
-          if(err){
-            res.send("RUH ROH");
-          }
-          console.log(items);
-          res.send(items);
-     });;
+    wordsDB.aggregate([{ $sample: { size: 3 } }]).toArray(function (err, items) {
+      if (err) {
+        res.send("RUH ROH");
+      }
+      console.log(items);
+      res.send(items);
+    });;
 
   }
 })
@@ -121,7 +123,13 @@ app.get('/api/support', function (req, res) {
     initDb();
   } else {
     var wordsDB = db.collection('supportQuotes');
-    res.send("Hey");
+    wordsDB.aggregate([{ $sample: { size: 3 } }]).toArray(function (err, items) {
+      if (err) {
+        res.send("RUH ROH");
+      }
+      console.log(items);
+      res.send(items);
+    });;
   }
 });
 
@@ -129,13 +137,22 @@ app.post('/api/motivation', function (req, res) {
   if (!db) {
     initDb();
   } else {
-     var wordsDB = db.collection('motivationQuotes');
+    var wordsDB = db.collection('motivationQuotes');
+    var motivationQuote = req.body.motivationQuote;
+    if (motivationQuote && motivationQuote.length < 51) {
+          motivationQuote = motivationQuote.trim();
+
+      motivationQuote = filter.clean(motivationQuote);
       wordsDB.insertOne({
-        "quote": req.body.motivationQuote
-      }, function(err, result){
+        "quote": motivationQuote
+      }, function (err, result) {
         res.send("Document Inserted!");
       });
 
+
+    } else {
+      res.send("That quote is too long! sorry :(");
+    }
   }
 });
 
@@ -143,6 +160,21 @@ app.post('/api/support', function (req, res) {
   if (!db) {
     initDb();
   } else {
+    var wordsDB = db.collection('supportQuotes');
+    var motivationQuote = req.body.motivationQuote;
+    if (motivationQuote && motivationQuote.length < 51) {
+      motivationQuote = motivationQuote.trim();
+      motivationQuote = filter.clean(motivationQuote);
+      wordsDB.insertOne({
+        "quote": motivationQuote
+      }, function (err, result) {
+        res.send("Document Inserted!");
+      });
+
+    } else {
+      res.send("That quote is too long! sorry :(");
+    }
+
 
   }
 })
