@@ -46,7 +46,7 @@ xhr.onreadystatechange = function(){
     }
 }
 
-xhr.open("/api/motivation");
+xhr.open("GET", "/api/motivation");
 xhr.send();
 
 
