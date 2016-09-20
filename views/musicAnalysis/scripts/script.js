@@ -29,25 +29,72 @@ var songsAnalyzed = 0;
 var oldSection;
 var songIndex = 0;
 var wordsForUser = document.getElementById("wordsForUser");
-var wordsOfEncouragement = ["GO", "KEEP IT UP", "GO HAM", "DIG DEEP", "FASTER STRONGER HARDER", "GOGOGOGOGO", "YOU GOT THIS", "PIERCE THE HEAVENS", "YOU'RE A MANIAC", "LEAVE MANKIND BEHIND"];
-var wordsOfResting = ["Take a breather", "Enjoy the song", "Get hyped and get ready", "You're doing great", "Get ready", "Round ??? coming up!"];
+var wordsOfEncouragement = [];
+var wordsOfResting = [];
 var myVisualizer;
 
 omniButton.mode = "fileUpload"
 
-var xhr = new XMLHttpRequest();
+function postMotivationQuote(quote) {
+    var xhr = new XMLHttpRequest();
+    var messageJSON = {};
+    messageJSON.motivationQuote = quote;
 
-xhr.onreadystatechange = function(){
-    if(this.readyState == 4 && this.status == 200){
-        var memes = JSON.parse(this.responseText);
-        console.log(memes);
-    }else{
-        console.log("Woops!");
+
+    xhr.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            console.log("THey got it boys!")
+        } else {
+            console.log("Woops!");
+        }
     }
+    xhr.open("POST", "/api/motivation");
+    xhr.setRequestHeader("Content-type", "application/json;charset=UTF-8")
+    xhr.send(JSON.stringify(messageJSON));
+
 }
 
-xhr.open("GET", "/api/motivation");
-xhr.send();
+function getMotivationQuotes() {
+    var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            var serverWords = JSON.parse(this.responseText);
+            for (var i = 0; i < serverWords.length; i++) {
+                wordsOfEncouragement.push(serverWords[i].quote);
+                console.log(wordsOfEncouragement);
+            }
+            console.log(memes);
+        } else {
+            console.log("Woops!");
+            wordsOfEncouragement = ["GO", "KEEP IT UP", "GO HAM", "DIG DEEP", "FASTER STRONGER HARDER", "GOGOGOGOGO", "YOU GOT THIS", "PIERCE THE HEAVENS", "YOU'RE A MANIAC", "LEAVE MANKIND BEHIND"];
+        }
+    }
+    xhr.open("GET", "/api/motivation");
+    xhr.send();
+}
+
+function getRestingQuotes() {
+    var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            var serverWords = JSON.parse(this.responseText);
+            for (var i = 0; i < serverWords.length; i++) {
+                wordsOfResting.push(serverWords[i].quote);
+                console.log(wordsOfResting);
+            }
+            console.log(memes);
+        } else {
+            console.log("Woops!");
+            wordsOfResting = ["Take a breather", "Enjoy the song", "Get hyped and get ready", "You're doing great", "Get ready", "Round ??? coming up!"];
+        }
+    }
+    xhr.open("GET", "/api/support");
+    xhr.send();
+}
+
+}
 
 
 
@@ -63,7 +110,7 @@ omniButton.addEventListener("click", function (ev) {
         omniButton.mode = "generatingWorkout";
     } else if (omniButton.mode === "startWorkout") {
         playBack();
-    } else if(omniButton.mode === "shareWorkout"){
+    } else if (omniButton.mode === "shareWorkout") {
 
     }
 })
@@ -578,6 +625,10 @@ function visualizeSection(currentSection) {
     }
     sectionAnalysis.innerHTML = '';
 }
+
+getMotivationQuotes();
+getRestingQuotes();
+postMotivationQuote("You're doing amazing!");
 
 
 
