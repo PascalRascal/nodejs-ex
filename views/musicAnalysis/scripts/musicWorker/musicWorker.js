@@ -13,7 +13,6 @@ function worker_function() {
     }
 
     function getPeaks(data, samplingRate, partsPerSecond) {
-        console.log('Getting Peaks of Song');
 
         // What we're going to do here, is to divide up our audio into parts.
 
@@ -113,10 +112,8 @@ function worker_function() {
     function getSections(peaks, samplingRate, data, sectionMargin) {
         var sections = [];
         var sectionMargin = sectionMargin;
-        console.log(sectionMargin);
         var totalSongDuration = data[0].length / samplingRate;
         var totalSongSize = data[0].length;
-        console.log(totalSongDuration);
         var sumDistances = 0;
         var avgDistance;
 
@@ -264,17 +261,14 @@ function worker_function() {
     self.addEventListener('message', function (e) {
         var data = e.data;
         if (data.cmd == "getPeaks") {
-            console.log(e.data);
             myPeaks = getPeaks(data.songData, data.samplingRate, data.peaksPerSecond);
             self.postMessage({ 'returnType': 'peaks', 'peaks': myPeaks, 'songData': data.songData, 'samplingRate': data.samplingRate });
         } else if (data.cmd == "getSections") {
-            console.log(data.songData);
             var sections = getSections(myPeaks, data.samplingRate, data.songData, data.sectionMargin);
             //After peaks have been analyzed, the section data can be deleted
             for (var i = 0; i < sections.length; i++) {
                 sections[i].sectionData = [];
             }
-            console.log(sections);
             self.postMessage({ 'returnType': 'sections', 'sections': sections });
             close();
         } else if (data.cmd == "getIntervals") {

@@ -4,11 +4,6 @@
   http://tech.beatport.com/2014/web-audio/beat-detection-using-web-audio/
  */
 
-/* TODO List
- * 1. Improve Visualization
- * 2. Ability to adjust algorithm options in the browser
- * 3. Improve Performance or at least add a loading bar or something
- */
 
 
 var queryInput = document.querySelector('#query'),
@@ -44,9 +39,7 @@ function postMotivationQuote(quote) {
 
     xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-            console.log("THey got it boys!")
         } else {
-            console.log("Woops!");
         }
     }
     xhr.open("POST", "/api/motivation");
@@ -63,9 +56,7 @@ function postSupportQuote(quote) {
 
     xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-            console.log("THey got it boys!")
         } else {
-            console.log("Woops!");
         }
     }
     xhr.open("POST", "/api/support");
@@ -85,7 +76,6 @@ function getMotivationQuotes() {
                 wordsOfEncouragement.push(serverWords[i].quote);
             }
         } else {
-            console.log("The request was not received");
         }
     }
     xhr.open("GET", "/api/motivation");
@@ -103,7 +93,6 @@ function getRestingQuotes() {
                 wordsOfResting.push(serverWords[i].quote);
             }
         } else if (this.status == 404 || this.status == 500) {
-            console.log("The request was not received");
         }
     }
     xhr.open("GET", "/api/support");
@@ -124,6 +113,8 @@ omniButton.addEventListener("click", function (ev) {
     if (omniButton.mode === "generateWorkout") {
         uploadFunction();
         omniButton.mode = "generatingWorkout";
+        omniButtonPrompt.innerHTML = "Analyzing Your Awesome Songs";
+
     } else if (omniButton.mode === "startWorkout") {
         playBack();
     } else if (omniButton.mode === "shareWords") {
@@ -176,7 +167,6 @@ function updateProgressState() {
 
         sectionAnalysis.innerHTML = '';
         drawSection(currentSection, currentSection.index);
-        console.log("Section Changed!");
         oldSection = currentSection;
     }
 
@@ -190,7 +180,6 @@ function switchSongs() {
 
     songIndex++;
     if (songs[songIndex]) {
-        console.log("Switching Song");
         audioTag.src = songs[songIndex].songObjectURL
         audioTag.load();
         audioTag.play();
@@ -232,7 +221,6 @@ result.style.display = 'none';
 //Trims the data and removes any irrelevant meta-data, also gets the sampling rate about the song
 function handleArrayBuffer(musicArrayBuffer, currentSong) {
     omniButtonIcon.classList = "fa fa-cog fa-spin omniButtonIconNoVisualization"
-    omniButtonPrompt.innerHTML = "Analyzing Your Awesome Songs"
 
 
     var musicDataView = new DataView(musicArrayBuffer);
@@ -249,7 +237,6 @@ function handleArrayBuffer(musicArrayBuffer, currentSong) {
         tagIndex++;
         frameType = mp3Parser.readTags(musicDataView)[tagIndex]._section.type
     }
-    console.log(mp3Parser.readTags(musicDataView)[tagIndex])
     var samplingRate = mp3Parser.readTags(musicDataView)[tagIndex].header.samplingRate
     currentSong.samplingRate = samplingRate;
 
@@ -352,20 +339,18 @@ var getMusicData = function (musicArrayBuffer, songsize, samplingRate, currentSo
         analyzeSong([renderedBuffer.getChannelData(0), renderedBuffer.getChannelData(1)], samplingRate, analysisOptions, currentSong, showWorkOut);
     };
 };
-
+var totalSongsAnalyzed = 0;
 //
 function showWorkOut(currentSong) {
     var totalDeviation = 0;
     var maximumDeviation = 0;
     if (isProcessingDone()) {
-        console.log("All songs have been processed!");
         document.getElementById("vanishingAct").classList = "hidden";
         myVisualizer = _createVisualizer({});
         myVisualizer.renderFrame();
-        console.log(songs);
         result.style.display = 'block';
         omniButtonIcon.classList = "fa fa-play omniButtonIconVisualization";
-        omniButtonPrompt.innerHTML = "Ready to go HAM"
+        omniButtonPrompt.classList = "hidden";
         omniButton.mode = "startWorkout";
         oldSection = songs[songIndex].analyzedData.sections[0];
         visualizeSection(oldSection);
@@ -377,6 +362,8 @@ function showWorkOut(currentSong) {
     currentSong.analyzedData.sections.forEach(function (section, index) {
         section.index = index;
     });
+    totalSongsAnalyzed++;
+    omniButtonPrompt.innerHTML = totalSongsAnalyzed + " / " + songs.length + " Awesome Songs Analyzed";
 
 
 
@@ -397,7 +384,6 @@ function analyzeSong(songData, samplingRate, songOptions, currentSong, cb) {
     } else {
         sm = 1.5;
     }
-    console.log(sm);
 
     var worker = new Worker(URL.createObjectURL(new Blob(["(" + worker_function.toString() + ")()"], { type: 'text/javascript' })));
 
@@ -466,6 +452,7 @@ var uploadFunction = function () {
 //Loads and analyzes the example song
 function getExampleAudio() {
     loadExampleSong('FuriousFreak.mp3', 0);
+    omniButtonPrompt.innerHTML = 'Loading and Analyzing "Furious Freak" by Kevin Macelod'
     fileUpload.classList = "hidden";
 }
 //Maybe? Have to load multiple songs
@@ -498,7 +485,6 @@ function isProcessingDone() {
 //Assume that i < j
 function combineSection(i, j, sections) {
     if (sections[i] && sections[j]) {
-        console.log("Starting to slice the sections")
         //Combine the easy things
         var newStart = sections[i].start;
         var newEnd = sections[j].end;
@@ -528,7 +514,6 @@ function drawSection(section, index) {
     sectionDiv = document.createElement("div");
     sectionDiv.addEventListener("click", function () {
         audioTag.currentTime = section.start / section.samplingRate;
-        console.log(section);
     })
     sectionDiv.className = "songSection";
     sectionDiv.innerHTML = `
@@ -604,7 +589,6 @@ function polishSections(currentSong) {
         totalIntensity = totalIntensity + section.intensity;
     });
     var avgIntensity = totalIntensity / currentSong.analyzedData.sections.length;
-    console.log("Average Intensity: " + avgIntensity);
     var intensityDev = getStandardDev(currentSong.analyzedData.sections, avgIntensity);
     currentSong.analyzedData.sections.forEach(function (section, index) {
         section.intensityDeviation = (section.intensity - avgIntensity) / intensityDev;
@@ -616,26 +600,22 @@ function visualizeSection(currentSection) {
     var sectionAnalysis = document.getElementById("sectionAnalysis");
     var inDev = currentSection.intensityDeviation;
     if (inDev > 1) {
-        console.log("Color Changed");
         startTransition(hex2Rgb(myVisualizer.barColor), hex2Rgb("#FF0000"), myVisualizer);
         myVisualizer.barHeight = 3;
         wordsForUser.innerHTML = randomWord(wordsOfEncouragement);
     }
     if (inDev > 0 && inDev < 1) {
-        console.log("Color Changed");
         myVisualizer.barHeight = 2.5;
         startTransition(hex2Rgb(myVisualizer.barColor), hex2Rgb("#FF8300"), myVisualizer);
         wordsForUser.innerHTML = randomWord(wordsOfEncouragement);
     }
 
     if (inDev < 0 && inDev > -0.5) {
-        console.log("Color Changed");
         myVisualizer.barHeight = 2;
         startTransition(hex2Rgb(myVisualizer.barColor), hex2Rgb("#194884"), myVisualizer);
         wordsForUser.innerHTML = randomWord(wordsOfResting);
     }
     if (inDev < -0.5) {
-        console.log("Color Changed");
         myVisualizer.barHeight = 2;
         startTransition(hex2Rgb(myVisualizer.barColor), hex2Rgb("#FF00FF"), myVisualizer);
         wordsForUser.innerHTML = randomWord(wordsOfResting);
@@ -651,7 +631,6 @@ $(".dropdown-menu li a").click(function(){
   }else{
       document.getElementById("modalLabel").innerHTML = "Keep it calm, keep it relaxed friend"
   }
-  console.log($("#wordChoice").text());
 });
 
 getMotivationQuotes();
@@ -663,13 +642,17 @@ $("#sendWords").click(function(){
     if(userWords){
         if($("#wordChoice").text().trim() == "Encouragement"){
             postMotivationQuote(userWords);
-            console.log("MotivaitonPosted");
         }else if ($("#wordChoice").text().trim() == "Support"){
             postSupportQuote(userWords);
-            console.log("supportPosted");
         }
     }
+
+    omniButton.mode = "finished";
+    wordsForUser.innerHTML = "Someone Will Appreciate Your Kind Words!";
+    omniButtonIcon.classList = "fa fa-thumbs-o-up omniButtonIconVisualization";
 });
+
+
 
 
 
