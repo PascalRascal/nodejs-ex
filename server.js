@@ -15,6 +15,7 @@ Object.assign = require('object-assign')
 app.engine('html', require('ejs').renderFile);
 app.use(morgan('combined'))
 app.use('/', express.static('views/musicAnalysis'));
+app.use(express.static('media'));
 app.use(bodyParser.json());
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
@@ -68,6 +69,20 @@ var initDb = function (callback) {
 app.get('/', function (req, res) {
   // try to initialize the db on every request if it's not already
   // initialized.
+  if(!db){
+    initDb(function(err){});
+  }
+  if(db){
+    db.collection('counts').insertOne(
+      {meme: "Thanks for visiting!"
+    }, 
+    function (err, result){
+        if(err){
+          console.log(err)
+        }
+      }
+    )
+  }
   res.render('musicAnalysis/index.html');
 });
 
@@ -86,10 +101,6 @@ app.get('/pagecount', function (req, res) {
   }
 });
 
-app.get('/musicfun', function (req, res) {
-  res.render('musicAnalysis/index.html');
-})
-12
 app.get('/api/motivation', function (req, res) {
   if (!db) {
     initDb();
@@ -99,7 +110,6 @@ app.get('/api/motivation', function (req, res) {
       if (err) {
         res.send("RUH ROH");
       }
-      console.log(items);
       res.send(items);
     });;
 
@@ -115,7 +125,6 @@ app.get('/api/support', function (req, res) {
       if (err) {
         res.send("RUH ROH");
       }
-      console.log(items);
       res.send(items);
     });;
   }
