@@ -14,7 +14,7 @@ Object.assign = require('object-assign')
 
 app.engine('html', require('ejs').renderFile);
 app.use(morgan('combined'))
-app.use('/musicFun', express.static('views/musicAnalysis'));
+app.use('/', express.static('views/musicAnalysis'));
 app.use(bodyParser.json());
 
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
