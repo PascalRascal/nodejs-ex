@@ -184,7 +184,7 @@ function switchSongs() {
         audioTag.load();
         audioTag.play();
     } else {
-        wordsForUser.innerHTML = "Great Work-Out! Click to Share Some Words";
+        wordsForUser.innerHTML = "Great Work-Out! Click to Share Some Motivation!";
         omniButton.mode = "shareWords";
         omniButtonIcon.classList = "fa fa-heart omniButtonIconVisualization";
     }
@@ -637,7 +637,6 @@ $(".dropdown-menu li a").click(function(){
 
 getMotivationQuotes();
 getRestingQuotes();
-postMotivationQuote("You're doing amazing!");
 
 $("#sendWords").click(function(){
     var userWords = document.getElementById("encourageInput").value
