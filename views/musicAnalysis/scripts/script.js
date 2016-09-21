@@ -25,7 +25,7 @@ var oldSection;
 var songIndex = 0;
 var wordsForUser = document.getElementById("wordsForUser");
 var wordsOfEncouragement = ["GO", "KEEP IT UP", "GO HAM", "DIG DEEP", "FASTER STRONGER HARDER", "GOGOGOGOGO", "YOU GOT THIS", "PIERCE THE HEAVENS", "YOU'RE A MANIAC", "LEAVE MANKIND BEHIND"];
-var wordsOfResting = ["Take a breather", "Enjoy the song", "Get hyped and get ready", "You're doing great", "Get ready", "Round ??? coming up!"];
+var wordsOfResting = ["Take a breather", "Enjoy the song", "Get hyped and get ready", "You're doing great", "Get ready"];
 
 var myVisualizer;
 
@@ -461,7 +461,7 @@ function getExampleAudio() {
 function loadExampleSong(songName, index) {
     var xhr = new XMLHttpRequest();
     var currentSong = new song(songName, index)
-    xhr.open('GET', window.location.href + '/exampleSongs/' + songName, true);
+    xhr.open('GET', '/exampleSongs/' + songName, true);
     xhr.responseType = 'arraybuffer';
     xhr.onload = function (e) {
         handleArrayBuffer(this.response, currentSong);
