@@ -95,7 +95,7 @@ app.get('/api/motivation', function (req, res) {
     initDb();
   } else {
     var wordsDB = db.collection('motivationQuotes');
-    wordsDB.aggregate([{ $sample: { size: 3 } }]).toArray(function (err, items) {
+    wordsDB.aggregate([{ $sample: { size: 50 } }]).toArray(function (err, items) {
       if (err) {
         res.send("RUH ROH");
       }
@@ -111,7 +111,7 @@ app.get('/api/support', function (req, res) {
     initDb();
   } else {
     var wordsDB = db.collection('supportQuotes');
-    wordsDB.aggregate([{ $sample: { size: 3 } }]).toArray(function (err, items) {
+    wordsDB.aggregate([{ $sample: { size: 50 } }]).toArray(function (err, items) {
       if (err) {
         res.send("RUH ROH");
       }
