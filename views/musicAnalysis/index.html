@@ -14,7 +14,7 @@
     <h1 id="songName" class="text-center"> HIITunes </h1>
     <div id="wordsForUser" class="text-center hidden"> </div>
     <div id="omniButton" class="text-center">
-        
+
         <i id="omniButtonIcon" class="fa fa-plus-square-o omniButtonIconNoVisualization" aria-hidden="true"> 
             <canvas id="musicVisualizer"></canvas> 
         </i>
@@ -49,8 +49,50 @@
 
 
         </div>
+
+        
+        <button type="button" class="btn btn-primary btn-lg center-block " style="width:50%; background-color: #3F3F3F; border: none;" data-toggle="modal"
+            data-target="#encourageModal">
+            Share Some Words Of Encouragement!
+        </button>
+        
+
     </div>
 
+            <!-- Modal -->
+        <div class="modal fade" id="encourageModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content userModal">
+                    <div class="modal-header">
+                        <h4 class="modal-title text-center block" id="myModalLabel">
+                            Share Some Words Of 
+                              <div  class="dropdown">
+    <div id= "wordChoice" class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Encouragement
+    <span class="caret"></span></div>
+    <ul class="dropdown-menu" style="left:38%">
+      <li><a href="#">Encouragement</a></li>
+      <li><a href="#">Support</a></li>
+    </ul>
+  </div>
+
+                        </h4>
+                    </div>
+                    <div class="modal-body">
+                        <label id="modalLabel" for="usr">Don't worry, we'll handle the caps-lock on our side ;)</label>
+                        <input type="text" class="form-control" id="encourageInput">
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default userModalButtonClose" data-dismiss="modal">Close</button>
+                        <button type="button" id="sendWords" class="btn btn-primary userModalButtonYes" data-dismiss="modal">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    <script type="text/javascript" src="scripts/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript" src="scripts/bootstrap.min.js"></script>
     <script type="text/javascript" src="bower_components/mp3-parser/lib/lib.js"></script>
     <script type="text/javascript" src="bower_components/mp3-parser/lib/xing.js"></script>
     <script type="text/javascript" src="bower_components/mp3-parser/lib/id3v2.js"></script>

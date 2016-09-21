@@ -29,8 +29,9 @@ var songsAnalyzed = 0;
 var oldSection;
 var songIndex = 0;
 var wordsForUser = document.getElementById("wordsForUser");
-var wordsOfEncouragement = [];
-var wordsOfResting = [];
+var wordsOfEncouragement = ["GO", "KEEP IT UP", "GO HAM", "DIG DEEP", "FASTER STRONGER HARDER", "GOGOGOGOGO", "YOU GOT THIS", "PIERCE THE HEAVENS", "YOU'RE A MANIAC", "LEAVE MANKIND BEHIND"];
+var wordsOfResting = ["Take a breather", "Enjoy the song", "Get hyped and get ready", "You're doing great", "Get ready", "Round ??? coming up!"];
+
 var myVisualizer;
 
 omniButton.mode = "fileUpload"
@@ -54,20 +55,37 @@ function postMotivationQuote(quote) {
 
 }
 
+function postSupportQuote(quote) {
+    var xhr = new XMLHttpRequest();
+    var messageJSON = {};
+    messageJSON.supportQuote = quote;
+
+
+    xhr.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            console.log("THey got it boys!")
+        } else {
+            console.log("Woops!");
+        }
+    }
+    xhr.open("POST", "/api/support");
+    xhr.setRequestHeader("Content-type", "application/json;charset=UTF-8")
+    xhr.send(JSON.stringify(messageJSON));
+
+}
+
 function getMotivationQuotes() {
     var xhr = new XMLHttpRequest();
 
     xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
+            wordsOfEncouragement = [];
             var serverWords = JSON.parse(this.responseText);
             for (var i = 0; i < serverWords.length; i++) {
                 wordsOfEncouragement.push(serverWords[i].quote);
-                console.log(wordsOfEncouragement);
             }
-            console.log(memes);
         } else {
-            console.log("Woops!");
-            wordsOfEncouragement = ["GO", "KEEP IT UP", "GO HAM", "DIG DEEP", "FASTER STRONGER HARDER", "GOGOGOGOGO", "YOU GOT THIS", "PIERCE THE HEAVENS", "YOU'RE A MANIAC", "LEAVE MANKIND BEHIND"];
+            console.log("The request was not received");
         }
     }
     xhr.open("GET", "/api/motivation");
@@ -79,15 +97,13 @@ function getRestingQuotes() {
 
     xhr.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
+            wordsOfResting = [];
             var serverWords = JSON.parse(this.responseText);
             for (var i = 0; i < serverWords.length; i++) {
                 wordsOfResting.push(serverWords[i].quote);
-                console.log(wordsOfResting);
             }
-            console.log(memes);
-        } else {
-            console.log("Woops!");
-            wordsOfResting = ["Take a breather", "Enjoy the song", "Get hyped and get ready", "You're doing great", "Get ready", "Round ??? coming up!"];
+        } else if (this.status == 404 || this.status == 500) {
+            console.log("The request was not received");
         }
     }
     xhr.open("GET", "/api/support");
@@ -110,7 +126,8 @@ omniButton.addEventListener("click", function (ev) {
         omniButton.mode = "generatingWorkout";
     } else if (omniButton.mode === "startWorkout") {
         playBack();
-    } else if (omniButton.mode === "shareWorkout") {
+    } else if (omniButton.mode === "shareWords") {
+        $("#encourageModal").modal("show");
 
     }
 })
@@ -178,9 +195,9 @@ function switchSongs() {
         audioTag.load();
         audioTag.play();
     } else {
-        wordsForUser.innerHTML = "Great Work-Out! Click to share some words of encouragement";
-        omniButtonIcon.mode = "shareWords";
-        omniButtonIcon.classList = "fa fa-thumbs-o-up omniButtonIconVisualization";
+        wordsForUser.innerHTML = "Great Work-Out! Click to Share Some Words";
+        omniButton.mode = "shareWords";
+        omniButtonIcon.classList = "fa fa-heart omniButtonIconVisualization";
     }
 
 
@@ -626,9 +643,33 @@ function visualizeSection(currentSection) {
     sectionAnalysis.innerHTML = '';
 }
 
+$(".dropdown-menu li a").click(function(){
+  $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+  $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+  if($("#wordChoice").text().trim() == "Encouragement"){
+      document.getElementById("modalLabel").innerHTML = "Don't worry, we'll handle the caps-lock on our side ;)"
+  }else{
+      document.getElementById("modalLabel").innerHTML = "Keep it calm, keep it relaxed friend"
+  }
+  console.log($("#wordChoice").text());
+});
+
 getMotivationQuotes();
 getRestingQuotes();
 postMotivationQuote("You're doing amazing!");
+
+$("#sendWords").click(function(){
+    var userWords = document.getElementById("encourageInput").value
+    if(userWords){
+        if($("#wordChoice").text().trim() == "Encouragement"){
+            postMotivationQuote(userWords);
+            console.log("MotivaitonPosted");
+        }else if ($("#wordChoice").text().trim() == "Support"){
+            postSupportQuote(userWords);
+            console.log("supportPosted");
+        }
+    }
+});
 
 
 

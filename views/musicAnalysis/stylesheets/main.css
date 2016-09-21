@@ -12,6 +12,37 @@
 	width: 50%;
 	cursor: pointer;
 }
+.userModal{
+	background-color:#040404;
+}
+
+
+.userModalButtonYes{
+	background-color: #27974A;
+		color:#ffffff;
+	border: none;
+}
+.userModalButtonYes:hover{
+	background-color: #27974A;
+	color:#3F3F3F;
+}
+#wordChoice{
+	background-color: #040404;
+	border: none;
+	font-size: 1vw;
+}
+
+.userModalButtonClose{
+	background-color: #E46A68;
+	color:#ffffff;
+	border: none;
+}
+.userModalButtonClose:hover {
+	background-color: #E46A68;
+		color:#3F3F3F;
+
+}
+
 
 #wordsForUser{
 	font-size: 3vw;
@@ -76,6 +107,9 @@
 	background-color: #3F3F3F;
 	border: none;
 	padding: 5px;
+}
+#modalPrompt{
+	display:inline;
 }
 
 .fileInput {

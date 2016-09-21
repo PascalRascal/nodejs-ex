@@ -140,7 +140,9 @@ app.post('/api/motivation', function (req, res) {
     var wordsDB = db.collection('motivationQuotes');
     var motivationQuote = req.body.motivationQuote;
     if (motivationQuote && motivationQuote.length < 51) {
-          motivationQuote = motivationQuote.trim();
+      motivationQuote = motivationQuote.toUpperCase();
+
+      motivationQuote = motivationQuote.trim();
 
       motivationQuote = filter.clean(motivationQuote);
       wordsDB.insertOne({
@@ -161,7 +163,7 @@ app.post('/api/support', function (req, res) {
     initDb();
   } else {
     var wordsDB = db.collection('supportQuotes');
-    var motivationQuote = req.body.motivationQuote;
+    var motivationQuote = req.body.supportQuote;
     if (motivationQuote && motivationQuote.length < 51) {
       motivationQuote = motivationQuote.trim();
       motivationQuote = filter.clean(motivationQuote);
