@@ -71,6 +71,8 @@
 .omniButtonIconVisualization{
 	z-index: 2;
 	position: relative;
+	padding-top: 1vw;
+	padding-left: 1.1vw;
 	width: 50vw;
 	height: 50vw;
 	overflow: visible;

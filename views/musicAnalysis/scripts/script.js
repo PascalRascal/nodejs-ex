@@ -452,7 +452,9 @@ var uploadFunction = function () {
 //Loads and analyzes the example song
 function getExampleAudio() {
     loadExampleSong('FuriousFreak.mp3', 0);
-    omniButtonPrompt.innerHTML = 'Loading and Analyzing "Furious Freak" by Kevin Macelod'
+    omniButtonIcon.classList = "fa fa-cog fa-spin omniButtonIconNoVisualization";
+    omniButtonPrompt.innerHTML = 'Loading and Analyzing "Furious Freak" by Kevin MacLeod'
+    document.getElementById("vanishingAct").classList = "hidden";
     fileUpload.classList = "hidden";
 }
 //Maybe? Have to load multiple songs
